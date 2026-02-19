@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bibirble</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+
+    <!-- Main Window (Frame) -->
+    <div class="frame">
+
+        <!-- Header -->
+        <div class="header-text">Bibirble</div>
+        <p id="subtitle">World English Bible Version</p>
+        <!-- Reveal Panel -->
+        <div id="reveal-panel"></div>
+
+        <!-- Scrollable Game Area -->
+        <div class="game-scroll-area">
+            <!-- Game Rows (Loop 0 to 6) -->
+            
+            <!-- Row 0: Enabled -->
+            <div class="game-row">
+                <select class="choice">
+                    <option></option>
+                    <!-- ArrayString books populated dynamically in C++, empty here -->
+                </select>
+                <!-- inputmode="none" prevents virtual keyboard on mobile, enforcing use of custom UI -->
+                <input type="text" class="text-ctrl" maxlength="1" inputmode="none">
+                <input type="text" class="text-ctrl" maxlength="1" inputmode="none">
+                <span class="static-text-sep">:</span>
+                <input type="text" class="text-ctrl" maxlength="1" inputmode="none">
+                <input type="text" class="text-ctrl" maxlength="1" inputmode="none">
+            </div>
+
+            <!-- Row 1: Disabled -->
+            <div class="game-row disabled">
+                <select class="choice" disabled></select>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <span class="static-text-sep">:</span>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+            </div>
+
+            <!-- Row 2: Disabled -->
+            <div class="game-row disabled">
+                <select class="choice" disabled></select>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <span class="static-text-sep">:</span>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+            </div>
+
+            <!-- Row 3: Disabled -->
+            <div class="game-row disabled">
+                <select class="choice" disabled></select>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <span class="static-text-sep">:</span>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+            </div>
+
+            <!-- Row 4: Disabled -->
+            <div class="game-row disabled">
+                <select class="choice" disabled></select>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <span class="static-text-sep">:</span>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+            </div>
+
+            <!-- Row 5: Disabled -->
+            <div class="game-row disabled">
+                <select class="choice" disabled></select>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <span class="static-text-sep">:</span>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+            </div>
+
+            <!-- Row 6: Disabled -->
+            <div class="game-row disabled">
+                <select class="choice" disabled></select>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <span class="static-text-sep">:</span>
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+                <input type="text" class="text-ctrl" disabled inputmode="none">
+            </div>
+            
+            <button type="submit" class="button" id="submit">Submit Answer</button>
+        </div>
+
+        <!-- Keyboard Panel -->
+        <div class="keyboard-panel">
+            <div class="keys-sizer-horizontal">
+                
+                <!-- Column 1 -->
+                <div class="key-column">
+                    <button class="button">1</button>
+                    <button class="button">2</button>
+                    <button class="button">3</button>
+                </div>
+
+                <!-- Column 2 -->
+                <div class="key-column">
+                    <button class="button">4</button>
+                    <button class="button">5</button>
+                    <button class="button">6</button>
+                </div>
+
+                <!-- Column 3 -->
+                <div class="key-column">
+                    <button class="button">7</button>
+                    <button class="button">8</button>
+                    <button class="button">9</button>
+                </div>
+
+                <!-- Column 4 -->
+                <div class="key-column">
+                    <button class="button">0</button>
+                    <button class="button">Del</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</body> 
+<script type="module" src="scripts/submit.js"></script>
+<script type="module" src="scripts/data.js"></script>
+<script type="module" src="scripts/game.js"></script>
+<script type="module" src="scripts/keyboard.js"></script>
+<script type="module" src="scripts/answer.js"></script>
+</html>

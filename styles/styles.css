@@ -1,0 +1,229 @@
+
+/* Global Reset and Base Styles */
+* {
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    background-color: #eae59f; /* Desktop background */
+    overflow: hidden; /* Prevent body scroll, handle inside frame */
+}
+
+/* 
+   Frame Mapping:
+   Main container for the app.
+*/
+.frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh; /* Modern mobile support */
+    max-width: 600px; /* Constrain width on tablets/desktop */
+    background-color: rgb(235, 230, 157);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+/* 
+   Header Mapping:
+*/
+.header-text {
+    font-size: clamp(1.5rem, 4vh, 2rem);
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0;
+    color: #333;
+    user-select: none;
+    flex-shrink: 0;
+}
+#subtitle {
+    text-align: center  ;
+    padding: 0%;
+    margin-top: 0%;
+
+}
+/*
+   Reveal Panel Mapping:
+*/
+#reveal-panel {
+    background-color: white;
+    width: 90%;
+    margin: 0 auto 10px auto;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    flex-shrink: 0;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.4;
+    flex-direction: column;
+}
+
+/*
+   Scrollable Game Area:
+   Wraps rows and submit button to allow scrolling on small screens
+   while keeping header/keyboard fixed.
+*/
+.game-scroll-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/*
+   Row Container Logic
+*/
+.game-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px;
+    width: 100%;
+    padding: 0 5px;
+}
+
+.game-row.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/*
+   Row Controls Mapping:
+*/
+.choice {
+    flex: 2;
+    max-width: 100px;
+    height: 40px;
+    margin-right: 4px;
+    font-size: 16px; /* Prevent iOS zoom */
+}
+
+.text-ctrl {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    margin-right: 4px;
+    font-size: 18px;
+    border: 1px solid #888;
+    border-radius: 4px;
+    background: white;
+    padding: 0;
+}
+
+/* Remove right margin from last input */
+.text-ctrl:last-child {
+    margin-right: 0;
+}
+
+.static-text-sep {
+    font-weight: bold;
+    margin-right: 4px;
+    user-select: none;
+}
+
+/*
+   Submit Button
+*/
+#submit {
+    width: 90%;
+    margin: 10px auto;
+    padding: 15px;
+    flex-shrink: 0;
+}
+
+/*
+   Keyboard Panel Mapping:
+   Fixed at bottom
+*/
+.keyboard-panel {
+    background-color: rgb(200, 100, 50);
+    padding: 10px;
+    width: 100%;
+    height: 25vh; /* Responsive height */
+    min-height: 160px;
+    max-height: 250px;
+    flex-shrink: 0;
+    padding-bottom: max(10px, env(safe-area-inset-bottom)); /* Handle iPhone Home Bar */
+}
+
+.keys-sizer-horizontal {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    gap: 6px;
+}
+
+.key-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 6px;
+}
+
+/*
+   Key Button Mapping:
+*/
+.button {
+    color: rgb(235, 230, 157);
+    background-color: rgb(200, 100, 50);
+    font-weight: bold;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    flex: 1;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: filter 0.1s;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+}
+
+/* Specific styling for submit button to stand out against background */
+#submit.button {
+    background-color: rgb(200, 100, 50);
+    color: rgb(235, 230, 157);
+    font-size: 18px;
+}
+
+.button:active {
+    filter: brightness(0.9);
+    transform: translateY(1px);
+}
+#view {
+    background-color: white;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Small Screen Adjustments */
+@media (max-width: 360px) {
+    .text-ctrl {
+        width: 34px;
+        font-size: 16px;
+    }
+    .choice {
+        max-width: 80px;
+    }
+    .header-text {
+        font-size: 1.5rem;
+    }
+}
