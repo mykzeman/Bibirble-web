@@ -2,25 +2,41 @@ import { setRow } from './submit.js';
 import { sliceList } from "./parse.js";
 
 let bibleData = [];
-function getDailySeed() {
-    const today = new Date().toISOString().slice(0, 10); // "2026-07-02"
+
+function hashStringToInt(str) {
     let hash = 0;
-    for (let i = 0; i < today.length; i++) {
-        hash = (hash << 5) - hash + today.charCodeAt(i);
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
         hash |= 0;
     }
     return Math.abs(hash);
 }
 
-// swap this in for your random idx:
+function getDailySeed() {
+    const today = new Date().toISOString().slice(0, 10);
+    return hashStringToInt(today);
+}
 
-export async function initGame() {
+// initGame now accepts options: { mode: 'daily'|'random', seed: string|number }
+export async function initGame(options = { mode: 'daily' }) {
     try {
         const res = await fetch("scripts/bible_sections.json");
         bibleData = await res.json();
-        
-        // Pick random verse
-        const idx = getDailySeed() % bibleData.length;
+        // Determine seed based on mode
+        const mode = options.mode || 'daily';
+        let seedVal;
+        if (mode === 'daily') {
+            seedVal = getDailySeed();
+        } else {
+            if (options.seed !== undefined && options.seed !== null && options.seed !== '') {
+                seedVal = typeof options.seed === 'number' ? options.seed : hashStringToInt(String(options.seed));
+            } else {
+                seedVal = Math.floor(Math.random() * 1e9);
+            }
+        }
+
+        // Pick verse index from seed
+        const idx = seedVal % bibleData.length;
         const verse = bibleData[idx];
         
         // Populate Dropdowns once
@@ -37,11 +53,11 @@ export async function initGame() {
 
         // Set initial reveal
         updateReveal(verse, 0);
-        
-        return idx;
+
+        return { idx, seed: seedVal };
     } catch (e) {
         console.error("Failed to load game data", e);
-        return 0;
+        return { idx: 0, seed: 0 };
     }
 }
 
@@ -95,12 +111,17 @@ function updateReveal(verse, stage) {
     }
 }
 
-export function submitFromData(stage, idx) {
+export function submitFromData(stage, idx, options = {}) {
     const verse = bibleData[idx];
     if (!verse) return [stage, idx];
 
-    // Check the row
-    const nextStage = setRow(stage, verse);
+    // Provide helper to validate a guessed verse exists in our dataset
+    options.isValidVerse = options.isValidVerse || function(book, chapter, verseNum) {
+        return bibleData.some(item => item.book === book && Number(item.chapter) === Number(chapter) && Number(item.verse) === Number(verseNum));
+    };
+
+    // Check the row (options may include hardMode)
+    const nextStage = setRow(stage, verse, options);
     
     // Update the revealed text based on new stage
     updateReveal(verse, nextStage);

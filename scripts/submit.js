@@ -40,13 +40,78 @@ function findListKey(item) {
     return null;
 }
 
-export function setRow(currentStage, verse) {
+export function setRow(currentStage, verse, options = {}) {
     const inputs = getGameRows(currentStage);
 
     if (inputs.length === 5) {
         const rowElements = document.querySelectorAll(".game-row");
         const activeRow = rowElements[currentStage];
         const nextRow = rowElements[currentStage + 1];
+
+        // Hard-mode enforcement: validate guess against previous clues and dataset before accepting
+        if (options.hardMode) {
+            // Build constraints from previous rows
+            const requiredGreens = [null, null, null, null];
+            const requiredYellows = [];
+            let requiredBook = null;
+            let requiredArea = null;
+
+            for (let r = 0; r < currentStage; r++) {
+                const row = rowElements[r];
+                const bookOpt = row.querySelector('.choice');
+                const bookBg = (bookOpt && bookOpt.style && bookOpt.style.backgroundColor) ? bookOpt.style.backgroundColor : null;
+                if (bookBg === 'green') {
+                    requiredBook = bookOpt.value;
+                } else if (bookBg === 'yellow') {
+                    requiredArea = requiredArea || findListKey(bookOpt.value);
+                }
+
+                const ctrls = row.querySelectorAll('.text-ctrl');
+                ctrls.forEach((ctrl, i) => {
+                    const bg = ctrl.style.backgroundColor;
+                    if (bg === 'green') requiredGreens[i] = ctrl.value;
+                    else if (bg === 'yellow') requiredYellows.push(ctrl.value);
+                });
+            }
+
+            const guessBook = inputs[0];
+            const guessDigits = inputs.slice(1);
+            // Check book constraints
+            if (requiredBook && guessBook !== requiredBook) {
+                alert('Hard mode: your guess must use the previously confirmed book.');
+                return currentStage;
+            }
+            if (requiredArea && findListKey(guessBook) !== requiredArea) {
+                alert('Hard mode: your guess must match the previously hinted book area.');
+                return currentStage;
+            }
+
+            // Check green digit constraints
+            for (let i = 0; i < 4; i++) {
+                if (requiredGreens[i] !== null && guessDigits[i] !== requiredGreens[i]) {
+                    alert('Hard mode: your guess must keep previously revealed digits in the same positions.');
+                    return currentStage;
+                }
+            }
+
+            // Check yellow presence
+            for (const yd of requiredYellows) {
+                if (!guessDigits.includes(yd)) {
+                    alert('Hard mode: your guess must include previously revealed digits (yellow hints).');
+                    return currentStage;
+                }
+            }
+
+            // Verify guessed verse exists in dataset
+            if (typeof options.isValidVerse === 'function') {
+                const chapter = guessDigits[0] + guessDigits[1];
+                const verseNum = guessDigits[2] + guessDigits[3];
+                if (!options.isValidVerse(guessBook, chapter, verseNum)) {
+                    alert('Hard mode: guessed verse must exist in the dataset.');
+                    return currentStage;
+                }
+            }
+        }
 
         // Disable current row
         activeRow.classList.add("disabled");

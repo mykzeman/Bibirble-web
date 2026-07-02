@@ -14,11 +14,72 @@
         <!-- Header -->
         <div class="header-text">Bibirble</div>
         <p id="subtitle">World English Bible Version</p>
+        <!-- Start Screen: choose mode to begin -->
+        <div id="start-screen" class="start-screen">
+            <div class="start-headline">Choose a mode to begin</div>
+            <div class="start-actions">
+                <button id="start-daily" class="mode-button">Start Daily</button>
+                <button id="start-random" class="mode-button">Start Random</button>
+                <button id="open-settings" class="mode-button secondary-button">Settings</button>
+            </div>
+            <div class="menu-info-card">
+                <h2>Game Overview</h2>
+                <p>Guess the verse by selecting the correct book and entering the chapter:verse digits. Green means exact match, yellow means correct digit in the wrong place, gray means not in the answer.</p>
+                <p>Daily challenges refresh at UTC midnight. Random games are replayable by seed. Hard mode only accepts valid verses and forces clues to be respected.</p>
+                <div class="info-row">
+                    <span class="info-label">How to play:</span>
+                    <span class="info-value">Choose a book, then enter the four chapter/verse digits based on the clue.</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Seed hint:</span>
+                    <span class="info-value">Use the Settings screen to set or randomize a seed for replayable games.</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Next Daily:</span>
+                    <span id="timer" class="info-value"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="settings-screen hidden">
+            <div class="settings-header">
+                <button id="settings-back" class="small-button">Back</button>
+                <div class="settings-title">Settings</div>
+            </div>
+            <div class="settings-card">
+                <div class="setting-row">
+                    <span>Hard mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="hard-mode" />
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <span>Random seed</span>
+                    <input id="settings-seed" class="seed-input" placeholder="enter seed" />
+                </div>
+                <div class="setting-row">
+                    <span>Current seed</span>
+                    <span id="current-seed-display" class="info-value">none</span>
+                </div>
+                <div class="setting-row settings-row-action">
+                    <button id="settings-new-seed" class="mode-button secondary-button">Randomize Seed</button>
+                </div>
+                <div class="settings-note">Seed settings and hard mode apply to the next game you start. You can return here anytime.</div>
+            </div>
+        </div>
+
         <!-- Reveal Panel -->
         <div id="reveal-panel"></div>
+        <div id="post-game-controls" class="hidden" style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+            <button id="btn-main-menu" class="mode-button">Main Menu</button>
+            <button id="btn-play-random" class="mode-button">Play Random</button>
+            <button id="btn-view-seed" class="mode-button">View / Set Seed</button>
+        </div>
 
         <!-- Scrollable Game Area -->
-        <div class="game-scroll-area">
+        <div class="game-scroll-area hidden">
             <!-- Game Rows (Loop 0 to 6) -->
             
             <!-- Row 0: Enabled -->
@@ -99,7 +160,7 @@
         </div>
 
         <!-- Keyboard Panel -->
-        <div class="keyboard-panel">
+        <div class="keyboard-panel hidden">
             <div class="keys-sizer-horizontal">
                 
                 <!-- Column 1 -->
