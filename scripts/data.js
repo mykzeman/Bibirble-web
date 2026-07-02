@@ -2,6 +2,17 @@ import { setRow } from './submit.js';
 import { sliceList } from "./parse.js";
 
 let bibleData = [];
+function getDailySeed() {
+    const today = new Date().toISOString().slice(0, 10); // "2026-07-02"
+    let hash = 0;
+    for (let i = 0; i < today.length; i++) {
+        hash = (hash << 5) - hash + today.charCodeAt(i);
+        hash |= 0;
+    }
+    return Math.abs(hash);
+}
+
+// swap this in for your random idx:
 
 export async function initGame() {
     try {
@@ -9,7 +20,7 @@ export async function initGame() {
         bibleData = await res.json();
         
         // Pick random verse
-        const idx = Math.floor(Math.random() * bibleData.length);
+        const idx = getDailySeed() % bibleData.length;
         const verse = bibleData[idx];
         
         // Populate Dropdowns once
