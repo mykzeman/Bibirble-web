@@ -12,6 +12,21 @@ function hashStringToInt(str) {
     return Math.abs(hash);
 }
 
+function createSeededRandom(seed) {
+    let value = seed >>> 0;
+    return function() {
+        value ^= value << 13;
+        value ^= value >>> 17;
+        value ^= value << 5;
+        return (value >>> 0) / 0x100000000;
+    };
+}
+
+function pickIndexFromSeed(seed, length) {
+    const random = createSeededRandom(seed);
+    return Math.floor(random() * length);
+}
+
 function getDailySeed() {
     const today = new Date().toISOString().slice(0, 10);
     return hashStringToInt(today);
@@ -36,7 +51,7 @@ export async function initGame(options = { mode: 'daily' }) {
         }
 
         // Pick verse index from seed
-        const idx = seedVal % bibleData.length;
+        const idx = pickIndexFromSeed(seedVal, bibleData.length);
         const verse = bibleData[idx];
         
         // Populate Dropdowns once
