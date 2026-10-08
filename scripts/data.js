@@ -1,5 +1,6 @@
 import { setRow } from './submit.js';
 import { sliceList } from "./parse.js";
+import { USEFUL_VERSES } from "./useful.js";
 
 let bibleData = [];
 
@@ -32,7 +33,18 @@ function getDailySeed() {
     return hashStringToInt(today);
 }
 
-// initGame now accepts options: { mode: 'daily'|'random', seed: string|number }
+// Indices into bibleData that make up the "Useful verses only" pool, in
+// dataset order so a seed maps to the same verse every time.
+function getUsefulIndices() {
+    const wanted = new Set(USEFUL_VERSES.map(([book, chapter, verse]) => `${book} ${chapter}:${verse}`));
+    const indices = [];
+    bibleData.forEach((item, i) => {
+        if (wanted.has(`${item.book} ${Number(item.chapter)}:${Number(item.verse)}`)) indices.push(i);
+    });
+    return indices;
+}
+
+// initGame now accepts options: { mode: 'daily'|'random', seed: string|number, usefulOnly: boolean }
 export async function initGame(options = { mode: 'daily' }) {
     try {
         const res = await fetch("scripts/bible_sections.json");
@@ -51,7 +63,13 @@ export async function initGame(options = { mode: 'daily' }) {
         }
 
         // Pick verse index from seed
-        const idx = pickIndexFromSeed(seedVal, bibleData.length);
+        let idx;
+        const usefulIndices = options.usefulOnly ? getUsefulIndices() : [];
+        if (usefulIndices.length > 0) {
+            idx = usefulIndices[pickIndexFromSeed(seedVal, usefulIndices.length)];
+        } else {
+            idx = pickIndexFromSeed(seedVal, bibleData.length);
+        }
         const verse = bibleData[idx];
         
         // Populate Dropdowns once
