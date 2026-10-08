@@ -6,6 +6,7 @@ var targetIndex = 0;
 var currentMode = 'daily';
 var currentSeed = null;
 var currentHardMode = false;
+var currentUsefulOnly = false;
 
 function getTodayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -45,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const seedInput = document.getElementById('settings-seed');
     const newSeedBtn = document.getElementById('settings-new-seed');
     const hardSwitch = document.getElementById('hard-mode');
+    const usefulSwitch = document.getElementById('useful-only');
     const currentSeedDisplay = document.getElementById('current-seed-display');
     const startScreen = document.getElementById('start-screen');
     const gameArea = document.querySelector('.game-scroll-area');
@@ -65,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (gameArea) gameArea.classList.remove('hidden');
             if (keyboard) keyboard.classList.remove('hidden');
             currentHardMode = !!(hardSwitch && hardSwitch.checked);
+            currentUsefulOnly = !!(usefulSwitch && usefulSwitch.checked);
             settingsReturnTo = 'game';
             await startGameFromUI();
         });
@@ -78,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (gameArea) gameArea.classList.remove('hidden');
             if (keyboard) keyboard.classList.remove('hidden');
             currentHardMode = !!(hardSwitch && hardSwitch.checked);
+            currentUsefulOnly = !!(usefulSwitch && usefulSwitch.checked);
             settingsReturnTo = 'game';
             await startGameFromUI();
         });
@@ -127,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset UI rows before starting
         resetGameUI();
 
-        const opts = { mode: currentMode };
+        const opts = { mode: currentMode, usefulOnly: currentUsefulOnly };
         const seedVal = seedInput && seedInput.value ? seedInput.value.trim() : '';
         if (currentMode === 'random') {
             if (!seedVal || forceNewRandom) opts.seed = undefined;

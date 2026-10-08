@@ -257,6 +257,21 @@ body {
     margin: 6px 0;
     line-height: 1.4;
 }
+.whats-new-card {
+    margin-bottom: 12px;
+}
+.whats-new-list {
+    margin: 6px 0;
+    padding-left: 20px;
+    line-height: 1.4;
+}
+.whats-new-list li {
+    margin: 4px 0;
+}
+.whats-new-note {
+    font-size: 0.85rem;
+    opacity: 0.75;
+}
 .info-row {
     display: flex;
     justify-content: space-between;
