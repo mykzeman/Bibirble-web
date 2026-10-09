@@ -45,7 +45,7 @@ function getUsefulIndices() {
     return indices;
 }
 
-// initGame now accepts options: { mode: 'daily'|'random', seed: string|number, usefulOnly: boolean }
+// initGame now accepts options: { mode: 'daily'|'random', seed: string|number, usefulOnly: boolean, allowMature: boolean }
 export async function initGame(options = { mode: 'daily' }) {
     try {
         const res = await fetch("scripts/bible_sections.json");
@@ -64,13 +64,12 @@ export async function initGame(options = { mode: 'daily' }) {
         }
 
         // Pick verse index from seed
-        let idx;
-        const usefulIndices = options.usefulOnly ? getUsefulIndices() : [];
-        if (usefulIndices.length > 0) {
-            idx = usefulIndices[pickIndexFromSeed(seedVal, usefulIndices.length)];
-        } else {
-            idx = pickIndexFromSeed(seedVal, bibleData.length);
-        }
+        // Candidate verses: the Useful pool or the whole dataset, minus
+        // mature (R18) verses unless R18 mode is on.
+        let candidates = options.usefulOnly ? getUsefulIndices() : [];
+        if (candidates.length === 0) candidates = bibleData.map((_, i) => i);
+        if (!options.allowMature) candidates = candidates.filter(i => !bibleData[i].mature);
+        const idx = candidates[pickIndexFromSeed(seedVal, candidates.length)];
         const verse = bibleData[idx];
         
         // Populate Dropdowns once
