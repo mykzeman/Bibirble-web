@@ -277,6 +277,10 @@ body {
 .whats-new-card {
     margin-bottom: 12px;
 }
+.whats-new-heading {
+    margin: 10px 0 2px;
+    font-size: 0.9rem;
+}
 .whats-new-list {
     margin: 6px 0;
     padding-left: 20px;
