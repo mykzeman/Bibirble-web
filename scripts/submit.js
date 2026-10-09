@@ -1,3 +1,5 @@
+import { findListKey, filterBooksByClues } from "./books.js";
+
 function getGameRows(rowIndex) {
     const gameRow = document.querySelectorAll(".game-row")[rowIndex];
     if (!gameRow) return [];
@@ -17,27 +19,6 @@ function getGameRows(rowIndex) {
     } else {
         return [];
     }
-}
-
-function findListKey(item) {
-    const AREAS = {
-        "Torah": ["genesis", "exodus", "leviticus", "numbers", "deuteronomy"],
-        "Historical": ["joshua", "judges", "1samuel", "2samuel", "1kings", "2kings", "1chronicles", "2chronicles"],
-        "Poems": ["psalms", "proverbs", "ecclesiastes", "songofsolomon", "lamentations"],
-        "Small stories": ["job", "esther", "jonah", "ruth", "ezra"],
-        "Prophets Major": ["isaiah", "jeremiah", "ezekiel", "daniel"],
-        "Prophets Minor": ["hosea", "joel", "amos", "obadiah", "micah", "nahum", "habakkuk", "zephaniah", "haggai", "zechariah", "malachi", "nehemiah"],
-        "Gospel": ["matthew", "mark", "luke", "john"],
-        "Acts from Hebrews": ["acts", "hebrews"],
-        "Pauls letters": ["romans", "1corinthians", "2corinthians", "galatians", "ephesians", "philippians", "colossians", "1thessalonians", "2thessalonians", "1timothy", "2timothy", "titus", "philemon"],
-        "Peter letters": ["1peter", "2peter"],
-        "James and Jude": ["james", "jude"],
-        "John Letters and Visions": ["1john", "2john", "3john", "revelation"]
-    };
-    for (const area in AREAS) {
-        if (AREAS[area].includes(item)) return area;
-    }
-    return null;
 }
 
 export function setRow(currentStage, verse, options = {}) {
@@ -192,6 +173,11 @@ export function setRow(currentStage, verse, options = {}) {
             }
         });
 
+        // --- Book hints (accessibility, never in hard mode) ---
+        if (options.bookHints && !options.hardMode) {
+            applyBookHints(rowElements, currentStage);
+        }
+
         // --- Check Win/Loss ---
         if (correctCount === 5) {
             // Use setTimeout to allow UI to update colors before alert
@@ -206,5 +192,31 @@ export function setRow(currentStage, verse, options = {}) {
     } else {
         alert("Please complete all fields in the current row before submitting.");
         return currentStage;
+    }
+}
+
+// Rebuilds the book dropdowns of the rows after currentStage so they only
+// offer books that still fit the book clues given so far.
+function applyBookHints(rowElements, currentStage) {
+    const clues = [];
+    for (let r = 0; r <= currentStage; r++) {
+        const select = rowElements[r].querySelector('.choice');
+        clues.push({ book: select.value, color: select.style.backgroundColor });
+    }
+    for (let r = currentStage + 1; r < rowElements.length; r++) {
+        const select = rowElements[r].querySelector('.choice');
+        const allBooks = (select.dataset.allBooks || '').split(',').filter(Boolean);
+        const books = filterBooksByClues(allBooks, clues);
+        const current = select.value;
+        select.innerHTML = '<option value=""></option>';
+        books.forEach(book => {
+            const option = document.createElement('option');
+            option.value = book;
+            option.textContent = book;
+            select.appendChild(option);
+        });
+        // Only one book left (green clue): pick it for the player.
+        if (books.length === 1) select.value = books[0];
+        else if (books.includes(current)) select.value = current;
     }
 }

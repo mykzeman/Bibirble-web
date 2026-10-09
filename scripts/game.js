@@ -7,6 +7,7 @@ var currentMode = 'daily';
 var currentSeed = null;
 var currentHardMode = false;
 var currentUsefulOnly = false;
+var currentBookHints = false;
 
 function getTodayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -47,6 +48,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const newSeedBtn = document.getElementById('settings-new-seed');
     const hardSwitch = document.getElementById('hard-mode');
     const usefulSwitch = document.getElementById('useful-only');
+    const hintsSwitch = document.getElementById('book-hints');
+    const hintsRow = document.getElementById('book-hints-row');
+
+    // Book hints are an assist, so they're switched off while hard mode is on.
+    function syncBookHintsAvailability() {
+        const hard = !!(hardSwitch && hardSwitch.checked);
+        if (hintsSwitch) hintsSwitch.disabled = hard;
+        if (hintsRow) hintsRow.classList.toggle('setting-disabled', hard);
+    }
+    if (hardSwitch) hardSwitch.addEventListener('change', syncBookHintsAvailability);
+    syncBookHintsAvailability();
     const currentSeedDisplay = document.getElementById('current-seed-display');
     const startScreen = document.getElementById('start-screen');
     const gameArea = document.querySelector('.game-scroll-area');
@@ -68,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (keyboard) keyboard.classList.remove('hidden');
             currentHardMode = !!(hardSwitch && hardSwitch.checked);
             currentUsefulOnly = !!(usefulSwitch && usefulSwitch.checked);
+            currentBookHints = !currentHardMode && !!(hintsSwitch && hintsSwitch.checked);
             settingsReturnTo = 'game';
             await startGameFromUI();
         });
@@ -82,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (keyboard) keyboard.classList.remove('hidden');
             currentHardMode = !!(hardSwitch && hardSwitch.checked);
             currentUsefulOnly = !!(usefulSwitch && usefulSwitch.checked);
+            currentBookHints = !currentHardMode && !!(hintsSwitch && hintsSwitch.checked);
             settingsReturnTo = 'game';
             await startGameFromUI();
         });
@@ -219,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 export function FinalSubmit() {
     const today = getTodayKey();
-    const result = submitFromData(stage, targetIndex, { hardMode: currentHardMode });
+    const result = submitFromData(stage, targetIndex, { hardMode: currentHardMode, bookHints: currentBookHints });
     stage = result[0];
 
     if (stage === -1) {

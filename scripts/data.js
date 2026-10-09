@@ -1,6 +1,7 @@
 import { setRow } from './submit.js';
 import { sliceList } from "./parse.js";
 import { USEFUL_VERSES } from "./useful.js";
+import { sortBooks } from "./books.js";
 
 let bibleData = [];
 
@@ -73,8 +74,10 @@ export async function initGame(options = { mode: 'daily' }) {
         const verse = bibleData[idx];
         
         // Populate Dropdowns once
-        const uniqueValues = [...new Set(bibleData.map(item => item.book))];
+        const uniqueValues = sortBooks(new Set(bibleData.map(item => item.book)));
         document.querySelectorAll(".choice").forEach(el => {
+            // Full list, kept so book hints can rebuild the dropdown later.
+            el.dataset.allBooks = uniqueValues.join(',');
             el.innerHTML = '<option value=""></option>'; // Clear existing
             uniqueValues.forEach(value => {
                 const option = document.createElement("option");

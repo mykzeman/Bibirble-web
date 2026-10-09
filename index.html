@@ -25,6 +25,9 @@
             <div class="menu-info-card whats-new-card">
                 <h2>✨ What's New</h2>
                 <ul class="whats-new-list">
+                    <li><strong>Book hints:</strong> an accessibility option in Settings. After each guess, the next book list only shows books that still fit your clues. Not available in hard mode.</li>
+                    <li><strong>Bible order:</strong> books in the dropdown now go Genesis to Revelation.</li>
+                    <li><strong>More useful verses:</strong> Useful verses only now has 365 verses to play.</li>
                     <li><strong>Useful verses only:</strong> turn it on in Settings to play only well-known verses like John 3:16 and Philippians 4:13. No more genealogies!</li>
                     <li><strong>Poetry is here:</strong> Psalms, Proverbs, Job, Lamentations and Song of Solomon verses are now in the game. Psalm 23 included!</li>
                     <li><strong>Fixed verses:</strong> verses that run across two paragraphs now show the whole verse instead of only the second half.</li>
@@ -71,6 +74,13 @@
                         <span class="slider"></span>
                     </label>
                 </div>
+                <div class="setting-row" id="book-hints-row">
+                    <span>Book hints<br><small class="setting-help">Narrows the book list using your clues. Not available in hard mode.</small></span>
+                    <label class="switch">
+                        <input type="checkbox" id="book-hints" />
+                        <span class="slider"></span>
+                    </label>
+                </div>
                 <div class="setting-row">
                     <span>Random seed</span>
                     <input id="settings-seed" class="seed-input" placeholder="enter seed" />
@@ -82,7 +92,7 @@
                 <div class="setting-row settings-row-action">
                     <button id="settings-new-seed" class="mode-button secondary-button">Randomize Seed</button>
                 </div>
-                <div class="settings-note">Seed settings, hard mode, and useful verses only apply to the next game you start. You can return here anytime.</div>
+                <div class="settings-note">Seed settings, hard mode, useful verses only, and book hints apply to the next game you start. You can return here anytime.</div>
             </div>
         </div>
 
