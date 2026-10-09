@@ -1,6 +1,7 @@
 import { setRow } from './submit.js';
 import { sliceList } from "./parse.js";
 import { USEFUL_VERSES } from "./useful.js";
+import { sortBooks } from "./books.js";
 
 let bibleData = [];
 
@@ -44,7 +45,7 @@ function getUsefulIndices() {
     return indices;
 }
 
-// initGame now accepts options: { mode: 'daily'|'random', seed: string|number, usefulOnly: boolean }
+// initGame now accepts options: { mode: 'daily'|'random', seed: string|number, usefulOnly: boolean, allowMature: boolean }
 export async function initGame(options = { mode: 'daily' }) {
     try {
         const res = await fetch("scripts/bible_sections.json");
@@ -63,18 +64,19 @@ export async function initGame(options = { mode: 'daily' }) {
         }
 
         // Pick verse index from seed
-        let idx;
-        const usefulIndices = options.usefulOnly ? getUsefulIndices() : [];
-        if (usefulIndices.length > 0) {
-            idx = usefulIndices[pickIndexFromSeed(seedVal, usefulIndices.length)];
-        } else {
-            idx = pickIndexFromSeed(seedVal, bibleData.length);
-        }
+        // Candidate verses: the Useful pool or the whole dataset, minus
+        // mature (R18) verses unless R18 mode is on.
+        let candidates = options.usefulOnly ? getUsefulIndices() : [];
+        if (candidates.length === 0) candidates = bibleData.map((_, i) => i);
+        if (!options.allowMature) candidates = candidates.filter(i => !bibleData[i].mature);
+        const idx = candidates[pickIndexFromSeed(seedVal, candidates.length)];
         const verse = bibleData[idx];
         
         // Populate Dropdowns once
-        const uniqueValues = [...new Set(bibleData.map(item => item.book))];
+        const uniqueValues = sortBooks(new Set(bibleData.map(item => item.book)));
         document.querySelectorAll(".choice").forEach(el => {
+            // Full list, kept so book hints can rebuild the dropdown later.
+            el.dataset.allBooks = uniqueValues.join(',');
             el.innerHTML = '<option value=""></option>'; // Clear existing
             uniqueValues.forEach(value => {
                 const option = document.createElement("option");

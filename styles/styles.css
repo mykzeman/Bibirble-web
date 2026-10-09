@@ -257,8 +257,29 @@ body {
     margin: 6px 0;
     line-height: 1.4;
 }
+.setting-row .switch {
+    flex-shrink: 0;
+}
+#r18-verify {
+    flex-wrap: wrap;
+}
+#r18-verify .seed-input {
+    flex: 1;
+    min-width: 140px;
+}
+.setting-help {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+.setting-disabled {
+    opacity: 0.45;
+}
 .whats-new-card {
     margin-bottom: 12px;
+}
+.whats-new-heading {
+    margin: 10px 0 2px;
+    font-size: 0.9rem;
 }
 .whats-new-list {
     margin: 6px 0;

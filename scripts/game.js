@@ -7,6 +7,8 @@ var currentMode = 'daily';
 var currentSeed = null;
 var currentHardMode = false;
 var currentUsefulOnly = false;
+var currentBookHints = false;
+var currentAllowMature = false;
 
 function getTodayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -47,6 +49,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const newSeedBtn = document.getElementById('settings-new-seed');
     const hardSwitch = document.getElementById('hard-mode');
     const usefulSwitch = document.getElementById('useful-only');
+    const hintsSwitch = document.getElementById('book-hints');
+    const hintsRow = document.getElementById('book-hints-row');
+
+    // Book hints are an assist, so they're switched off while hard mode is on.
+    function syncBookHintsAvailability() {
+        const hard = !!(hardSwitch && hardSwitch.checked);
+        if (hintsSwitch) hintsSwitch.disabled = hard;
+        if (hintsRow) hintsRow.classList.toggle('setting-disabled', hard);
+    }
+    if (hardSwitch) hardSwitch.addEventListener('change', syncBookHintsAvailability);
+    syncBookHintsAvailability();
+
+    // R18 mode: only switches on after a date-of-birth check (18 or older).
+    const r18Switch = document.getElementById('r18-mode');
+    const r18Verify = document.getElementById('r18-verify');
+    const r18Dob = document.getElementById('r18-dob');
+    const r18Confirm = document.getElementById('r18-confirm');
+    const r18Message = document.getElementById('r18-message');
+    let r18Verified = false;
+
+    function showR18Message(text) {
+        if (!r18Message) return;
+        r18Message.textContent = text;
+        r18Message.classList.toggle('hidden', !text);
+    }
+
+    if (r18Switch) {
+        r18Switch.addEventListener('change', () => {
+            if (r18Switch.checked && !r18Verified) {
+                r18Switch.checked = false;
+                if (r18Verify) r18Verify.classList.remove('hidden');
+                showR18Message('Enter your date of birth to turn on R18 mode.');
+                if (r18Dob) r18Dob.focus();
+            } else if (!r18Switch.checked) {
+                if (r18Verify) r18Verify.classList.add('hidden');
+                showR18Message('');
+            }
+        });
+    }
+
+    if (r18Confirm) {
+        r18Confirm.addEventListener('click', (e) => {
+            e.preventDefault();
+            const age = ageFromBirthDate(r18Dob ? r18Dob.value : '', new Date());
+            if (age === null) {
+                showR18Message('Please enter a valid date of birth.');
+            } else if (age < 18) {
+                showR18Message('Sorry, R18 mode is only for players 18 or older.');
+            } else {
+                r18Verified = true;
+                r18Switch.checked = true;
+                if (r18Verify) r18Verify.classList.add('hidden');
+                showR18Message('R18 mode is on.');
+            }
+        });
+    }
     const currentSeedDisplay = document.getElementById('current-seed-display');
     const startScreen = document.getElementById('start-screen');
     const gameArea = document.querySelector('.game-scroll-area');
@@ -68,6 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (keyboard) keyboard.classList.remove('hidden');
             currentHardMode = !!(hardSwitch && hardSwitch.checked);
             currentUsefulOnly = !!(usefulSwitch && usefulSwitch.checked);
+            currentBookHints = !currentHardMode && !!(hintsSwitch && hintsSwitch.checked);
+            currentAllowMature = !!(r18Switch && r18Switch.checked);
             settingsReturnTo = 'game';
             await startGameFromUI();
         });
@@ -82,6 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (keyboard) keyboard.classList.remove('hidden');
             currentHardMode = !!(hardSwitch && hardSwitch.checked);
             currentUsefulOnly = !!(usefulSwitch && usefulSwitch.checked);
+            currentBookHints = !currentHardMode && !!(hintsSwitch && hintsSwitch.checked);
+            currentAllowMature = !!(r18Switch && r18Switch.checked);
             settingsReturnTo = 'game';
             await startGameFromUI();
         });
@@ -131,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset UI rows before starting
         resetGameUI();
 
-        const opts = { mode: currentMode, usefulOnly: currentUsefulOnly };
+        const opts = { mode: currentMode, usefulOnly: currentUsefulOnly, allowMature: currentAllowMature };
         const seedVal = seedInput && seedInput.value ? seedInput.value.trim() : '';
         if (currentMode === 'random') {
             if (!seedVal || forceNewRandom) opts.seed = undefined;
@@ -219,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 export function FinalSubmit() {
     const today = getTodayKey();
-    const result = submitFromData(stage, targetIndex, { hardMode: currentHardMode });
+    const result = submitFromData(stage, targetIndex, { hardMode: currentHardMode, bookHints: currentBookHints });
     stage = result[0];
 
     if (stage === -1) {
@@ -241,6 +303,22 @@ export function FinalSubmit() {
         const postGame = document.getElementById('post-game-controls');
         if (postGame) postGame.classList.remove('hidden');
     }
+}
+
+// Whole years between a YYYY-MM-DD birth date and today, or null if the
+// date is missing, invalid, or in the future.
+export function ageFromBirthDate(value, today) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '');
+    if (!match) return null;
+    const [year, month, day] = match.slice(1).map(Number);
+    const birth = new Date(year, month - 1, day);
+    if (birth.getFullYear() !== year || birth.getMonth() !== month - 1 || birth.getDate() !== day) return null;
+    if (birth > today) return null;
+    let age = today.getFullYear() - year;
+    const hadBirthday = today.getMonth() > month - 1 ||
+        (today.getMonth() === month - 1 && today.getDate() >= day);
+    if (!hadBirthday) age--;
+    return age;
 }
 
 function startDailyTimer() {
