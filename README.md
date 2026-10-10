@@ -15,9 +15,21 @@ npx http-server -c-1
 python -m http.server 8000
 ```
 
+## Install as a Mobile App
+
+Bibirble is a Progressive Web App (PWA). When it's served over HTTPS (or `localhost`):
+
+- **Android (Chrome):** open the site, tap the menu, then **Install app** / **Add to Home screen**.
+- **iPhone/iPad (Safari):** tap **Share**, then **Add to Home Screen**.
+
+It opens full screen with its own icon and keeps working offline after the first load. When you ship changes, bump `CACHE` in `sw.js`.
+
 ## Project Structure
 
 - `index.html` — main entry page
+- `manifest.webmanifest` — app name, icons and colors for installing
+- `sw.js` — service worker for offline play
+- `icons/` — app icons
 - `styles/` — CSS (styles.css)
 - `scripts/` — JavaScript files and data
 	- `answer.js`
