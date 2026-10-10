@@ -1,5 +1,6 @@
 import { initGame, submitFromData } from "./data.js";
 import { share } from "./answer.js";
+import { AREAS } from "./books.js";
 
 var stage = 0;
 var targetIndex = 0;
@@ -9,6 +10,7 @@ var currentHardMode = false;
 var currentUsefulOnly = false;
 var currentBookHints = false;
 var currentAllowMature = false;
+var gameOver = false;
 
 function getTodayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -37,9 +39,6 @@ function lockGameForToday() {
 // Initialize the game on load
 // game.js
 document.addEventListener('DOMContentLoaded', () => {
-    const today = getTodayKey();
-    const lastPlayedDaily = localStorage.getItem('lastPlayedDaily');
-
     const startDailyBtn = document.getElementById('start-daily');
     const startRandomBtn = document.getElementById('start-random');
     const openSettingsBtn = document.getElementById('open-settings');
@@ -50,16 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hardSwitch = document.getElementById('hard-mode');
     const usefulSwitch = document.getElementById('useful-only');
     const hintsSwitch = document.getElementById('book-hints');
-    const hintsRow = document.getElementById('book-hints-row');
 
-    // Book hints are an assist, so they're switched off while hard mode is on.
-    function syncBookHintsAvailability() {
-        const hard = !!(hardSwitch && hardSwitch.checked);
-        if (hintsSwitch) hintsSwitch.disabled = hard;
-        if (hintsRow) hintsRow.classList.toggle('setting-disabled', hard);
-    }
-    if (hardSwitch) hardSwitch.addEventListener('change', syncBookHintsAvailability);
-    syncBookHintsAvailability();
 
     // R18 mode: only switches on after a date-of-birth check (18 or older).
     const r18Switch = document.getElementById('r18-mode');
@@ -109,13 +99,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const startScreen = document.getElementById('start-screen');
     const gameArea = document.querySelector('.game-scroll-area');
     const keyboard = document.querySelector('.keyboard-panel');
+    const backMenuBtn = document.getElementById('btn-back-menu');
+    const areasRef = document.getElementById('areas-ref');
     let settingsReturnTo = 'menu';
+
+    // Book areas reference (what a yellow book clue means outside hard mode)
+    const areasList = document.getElementById('areas-list');
+    if (areasList) {
+        Object.entries(AREAS).forEach(([area, books]) => {
+            const item = areasList.appendChild(document.createElement('li'));
+            item.appendChild(document.createElement('strong')).textContent = area + ': ';
+            item.appendChild(document.createTextNode(books.join(', ')));
+        });
+    }
 
     if (startDailyBtn) {
         startDailyBtn.addEventListener('click', async () => {
             currentMode = 'daily';
             // if already played, lock
-            if (lastPlayedDaily === today) {
+            if (localStorage.getItem('lastPlayedDaily') === getTodayKey()) {
                 lockGameForToday();
                 return;
             }
@@ -126,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (keyboard) keyboard.classList.remove('hidden');
             currentHardMode = !!(hardSwitch && hardSwitch.checked);
             currentUsefulOnly = !!(usefulSwitch && usefulSwitch.checked);
-            currentBookHints = !currentHardMode && !!(hintsSwitch && hintsSwitch.checked);
+            currentBookHints = !!(hintsSwitch && hintsSwitch.checked);
             currentAllowMature = !!(r18Switch && r18Switch.checked);
             settingsReturnTo = 'game';
             await startGameFromUI();
@@ -142,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (keyboard) keyboard.classList.remove('hidden');
             currentHardMode = !!(hardSwitch && hardSwitch.checked);
             currentUsefulOnly = !!(usefulSwitch && usefulSwitch.checked);
-            currentBookHints = !currentHardMode && !!(hintsSwitch && hintsSwitch.checked);
+            currentBookHints = !!(hintsSwitch && hintsSwitch.checked);
             currentAllowMature = !!(r18Switch && r18Switch.checked);
             settingsReturnTo = 'game';
             await startGameFromUI();
@@ -192,6 +194,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function startGameFromUI(forceNewRandom = false) {
         // Reset UI rows before starting
         resetGameUI();
+        // Back button: random games only, never daily or hard mode.
+        if (backMenuBtn) backMenuBtn.classList.toggle('hidden', currentMode !== 'random' || currentHardMode);
+        // Areas reference: not in hard mode (yellow means same testament there).
+        if (areasRef) {
+            areasRef.classList.toggle('hidden', currentHardMode);
+            areasRef.open = false;
+        }
 
         const opts = { mode: currentMode, usefulOnly: currentUsefulOnly, allowMature: currentAllowMature };
         const seedVal = seedInput && seedInput.value ? seedInput.value.trim() : '';
@@ -217,6 +226,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetGameUI() {
         stage = 0;
+        gameOver = false;
+        const view = document.getElementById('view');
+        if (view) view.remove();
         // Clear reveal panel
         const reveal = document.getElementById('reveal-panel');
         if (reveal) {
@@ -244,12 +256,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (postGame) postGame.classList.add('hidden');
     }
 
-    if (btnMain) btnMain.addEventListener('click', () => {
+    function goToMainMenu() {
         resetGameUI();
         if (gameArea) gameArea.classList.add('hidden');
         if (keyboard) keyboard.classList.add('hidden');
         if (startScreen) startScreen.classList.remove('hidden');
-    });
+        settingsReturnTo = 'menu';
+    }
+
+    if (btnMain) btnMain.addEventListener('click', goToMainMenu);
+    if (backMenuBtn) backMenuBtn.addEventListener('click', goToMainMenu);
 
     if (btnPlayRandom) btnPlayRandom.addEventListener('click', async () => {
         // Start another random game
@@ -279,6 +295,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Submit button: checks the guess, or shares the result once the game is over.
+export function onSubmitPressed() {
+    if (gameOver) {
+        share({ mode: currentMode, seed: currentSeed, hardMode: currentHardMode });
+    } else {
+        FinalSubmit();
+    }
+}
+
 export function FinalSubmit() {
     const today = getTodayKey();
     const result = submitFromData(stage, targetIndex, { hardMode: currentHardMode, bookHints: currentBookHints });
@@ -288,16 +313,11 @@ export function FinalSubmit() {
         if (currentMode === 'daily') {
             localStorage.setItem('lastPlayedDaily', today);
         }
+        gameOver = true;
         const submit = document.getElementById('submit');
-
         if (submit) {
             submit.innerText = 'Share';
             submit.disabled = false;
-            submit.onclick = (e) => {
-                e.preventDefault();
-                share();
-                submit.disabled = true;
-            };
         }
         // Show post-game controls
         const postGame = document.getElementById('post-game-controls');

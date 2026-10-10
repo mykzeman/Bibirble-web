@@ -34,8 +34,12 @@
             <details class="menu-info-card whats-new-card">
                 <summary>✨ What's New <span class="whats-new-hint">tap to show</span></summary>
                 <ul class="whats-new-list">
+                    <li><strong>Back button:</strong> leave a Random game and return to the Main Menu (not in Daily or hard mode).</li>
+                    <li><strong>Book areas:</strong> tap "Book areas" during a game to see which books share a yellow clue (not in hard mode).</li>
+                    <li><strong>Hard mode:</strong> yellow books now mean the same testament, and book hints can be turned on.</li>
+                    <li><strong>Sharing:</strong> gray squares show up, the share sheet works on phones, and no answer spoilers.</li>
                     <li><strong>R18 mode:</strong> mature verses hidden by default; 18+ can turn them on in Settings.</li>
-                    <li><strong>Book hints:</strong> book list narrows to books that fit your clues (not in hard mode).</li>
+                    <li><strong>Book hints:</strong> book list narrows to books that fit your clues.</li>
                     <li><strong>Bible order:</strong> books now go Genesis to Revelation.</li>
                     <li><strong>Useful verses:</strong> now 365 well-known, family-friendly verses.</li>
                     <li><strong>Poetry:</strong> Psalms (1–99), Proverbs, Job, Lamentations, Song of Solomon.</li>
@@ -45,7 +49,7 @@
             <div class="menu-info-card">
                 <h2>Game Overview</h2>
                 <p>Guess the verse by selecting the correct book and entering the chapter:verse digits. Green means exact match, yellow means correct digit in the wrong place, gray means not in the answer.</p>
-                <p>Daily challenges refresh at UTC midnight. Random games are replayable by seed. Hard mode only accepts valid verses and forces clues to be respected. Turn on "Useful verses only" in Settings to skip genealogies and lists and play only well-known verses.</p>
+                <p>Daily challenges refresh at UTC midnight. Random games are replayable by seed. Hard mode only accepts valid verses, forces clues to be respected, and a yellow book means the same testament instead of the same area. Turn on "Useful verses only" in Settings to skip genealogies and lists and play only well-known verses.</p>
                 <div class="info-row">
                     <span class="info-label">How to play:</span>
                     <span class="info-value">Choose a book, then enter the four chapter/verse digits based on the clue.</span>
@@ -83,7 +87,7 @@
                     </label>
                 </div>
                 <div class="setting-row" id="book-hints-row">
-                    <span>Book hints<br><small class="setting-help">Narrows the book list using your clues. Not available in hard mode.</small></span>
+                    <span>Book hints<br><small class="setting-help">Narrows the book list using your clues. Works in hard mode too.</small></span>
                     <label class="switch">
                         <input type="checkbox" id="book-hints" />
                         <span class="slider"></span>
@@ -127,6 +131,15 @@
 
         <!-- Scrollable Game Area -->
         <div class="game-scroll-area hidden">
+            <!-- Game toolbar: back button (random only) and book areas reference (not in hard mode) -->
+            <div class="game-toolbar">
+                <button id="btn-back-menu" class="small-button hidden">&larr; Main Menu</button>
+                <details id="areas-ref" class="areas-ref hidden">
+                    <summary>📖 Book areas</summary>
+                    <p class="areas-help">A yellow book means the answer is in the same area.</p>
+                    <ul id="areas-list" class="areas-list"></ul>
+                </details>
+            </div>
             <!-- Game Rows (Loop 0 to 6) -->
             
             <!-- Row 0: Enabled -->
