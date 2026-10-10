@@ -276,10 +276,22 @@ body {
 }
 .whats-new-card {
     margin-bottom: 12px;
+    min-height: 0;
 }
-.whats-new-heading {
-    margin: 10px 0 2px;
-    font-size: 0.9rem;
+.whats-new-card summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    list-style-position: inside;
+}
+.whats-new-hint {
+    font-weight: normal;
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin-left: 6px;
+}
+.whats-new-card[open] .whats-new-hint {
+    display: none;
 }
 .whats-new-list {
     margin: 6px 0;
@@ -288,10 +300,6 @@ body {
 }
 .whats-new-list li {
     margin: 4px 0;
-}
-.whats-new-note {
-    font-size: 0.85rem;
-    opacity: 0.75;
 }
 .info-row {
     display: flex;

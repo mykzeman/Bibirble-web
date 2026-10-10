@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bibirble</title>
+    <meta name="theme-color" content="#ebe69d">
+    <meta name="description" content="Guess the Bible verse, Wordle-style.">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Bibirble">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
@@ -22,24 +31,17 @@
                 <button id="start-random" class="mode-button">Start Random</button>
                 <button id="open-settings" class="mode-button secondary-button">Settings</button>
             </div>
-            <div class="menu-info-card whats-new-card">
-                <h2>✨ What's New</h2>
-                <h3 class="whats-new-heading">New in this update</h3>
+            <details class="menu-info-card whats-new-card">
+                <summary>✨ What's New <span class="whats-new-hint">tap to show</span></summary>
                 <ul class="whats-new-list">
-                    <li><strong>R18 mode:</strong> verses with mature content are now hidden by default. Players 18 or older can turn on R18 mode in Settings after picking their date of birth.</li>
-                    <li><strong>Book hints:</strong> an accessibility option in Settings. After each guess, the next book list only shows books that still fit your clues. Not available in hard mode.</li>
-                    <li><strong>Bible order:</strong> books in the dropdown now go Genesis to Revelation.</li>
-                    <li><strong>More useful verses:</strong> Useful verses only now has 365 family-friendly verses, picked to skip genealogies, census lists and measurements.</li>
-                    <li><strong>Fixed:</strong> Nehemiah guesses now get the right clue color.</li>
+                    <li><strong>R18 mode:</strong> mature verses hidden by default; 18+ can turn them on in Settings.</li>
+                    <li><strong>Book hints:</strong> book list narrows to books that fit your clues (not in hard mode).</li>
+                    <li><strong>Bible order:</strong> books now go Genesis to Revelation.</li>
+                    <li><strong>Useful verses:</strong> now 365 well-known, family-friendly verses.</li>
+                    <li><strong>Poetry:</strong> Psalms (1–99), Proverbs, Job, Lamentations, Song of Solomon.</li>
+                    <li><strong>Fixes:</strong> Nehemiah clue colors; verses split across paragraphs show in full.</li>
                 </ul>
-                <h3 class="whats-new-heading">Earlier</h3>
-                <ul class="whats-new-list">
-                    <li><strong>Useful verses only:</strong> play only well-known verses like John 3:16 and Philippians 4:13.</li>
-                    <li><strong>Poetry is here:</strong> Psalms, Proverbs, Job, Lamentations and Song of Solomon. Psalm 23 included!</li>
-                    <li><strong>Fixed verses:</strong> verses that run across two paragraphs now show in full.</li>
-                </ul>
-                <p class="whats-new-note">Psalms past chapter 99 aren't included yet, since guesses use two chapter digits.</p>
-            </div>
+            </details>
             <div class="menu-info-card">
                 <h2>Game Overview</h2>
                 <p>Guess the verse by selecting the correct book and entering the chapter:verse digits. Green means exact match, yellow means correct digit in the wrong place, gray means not in the answer.</p>
@@ -246,4 +248,12 @@
 <script type="module" src="scripts/game.js"></script>
 <script type="module" src="scripts/keyboard.js"></script>
 <script type="module" src="scripts/answer.js"></script>
+<script>
+    // Installable app: offline support via service worker (skipped on file://)
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+    }
+</script>
 </html>
