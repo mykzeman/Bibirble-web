@@ -216,6 +216,21 @@ document.addEventListener('DOMContentLoaded', () => {
             currentSeedDisplay.textContent = currentMode === 'random' ? String(currentSeed) : 'none';
         }
         if (currentMode === 'random' && seedInput) seedInput.value = String(currentSeed);
+        if (currentHardMode) showHardModeIntroOnce();
+    }
+
+    // Explains the hard mode rules the first time a player starts a hard mode game.
+    const hardIntro = document.getElementById('hard-mode-intro');
+    const hardIntroOk = document.getElementById('hard-mode-intro-ok');
+    if (hardIntroOk) hardIntroOk.addEventListener('click', () => hardIntro.close());
+
+    function showHardModeIntroOnce() {
+        if (!hardIntro || typeof hardIntro.showModal !== 'function') return;
+        try {
+            if (localStorage.getItem('seenHardModeIntro')) return;
+            localStorage.setItem('seenHardModeIntro', '1');
+        } catch (e) { /* storage blocked: still show it this time */ }
+        hardIntro.showModal();
     }
     
     // Post-game controls wiring

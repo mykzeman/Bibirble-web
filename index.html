@@ -35,6 +35,7 @@
                 <summary>✨ What's New <span class="whats-new-hint">tap to show</span></summary>
                 <!-- Keep each feature to at most two lines on a phone screen. See CLAUDE.md. -->
                 <ul class="whats-new-list">
+                    <li><strong>Hard mode guide:</strong> rules pop up on your first game.</li>
                     <li><strong>Back button:</strong> leave Random games anytime.</li>
                     <li><strong>Book areas:</strong> see what yellow books mean.</li>
                     <li><strong>Hard mode:</strong> yellow = same testament.</li>
@@ -121,6 +122,18 @@
                 <div class="settings-note">Seed settings, hard mode, useful verses only, book hints, and R18 mode apply to the next game you start. You can return here anytime.</div>
             </div>
         </div>
+
+        <!-- Hard mode guide: shown the first time a player starts a hard mode game -->
+        <dialog id="hard-mode-intro" class="hard-mode-intro">
+            <h2>💪 Welcome to Hard Mode!</h2>
+            <ul>
+                <li>Only real Bible verses can be guessed.</li>
+                <li>Keep green digits in place and reuse yellow digits.</li>
+                <li>Keep a green book. A yellow book means the answer is in the <strong>same testament</strong> (Old or New), not the same area.</li>
+                <li>No back button or book areas list. Book hints still work if you turn them on.</li>
+            </ul>
+            <button id="hard-mode-intro-ok" class="mode-button">Got it!</button>
+        </dialog>
 
         <!-- Reveal Panel -->
         <div id="reveal-panel"></div>
