@@ -437,6 +437,37 @@ body {
     line-height: 1.4;
 }
 
+/* Hard mode guide (first hard mode game) */
+.hard-mode-intro {
+    width: min(92vw, 420px);
+    border: none;
+    border-radius: 16px;
+    padding: 18px;
+    background: white;
+    color: #333;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.hard-mode-intro::backdrop {
+    background: rgba(0,0,0,0.4);
+}
+.hard-mode-intro h2 {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    text-align: center;
+}
+.hard-mode-intro ul {
+    margin: 0 0 14px;
+    padding-left: 20px;
+    line-height: 1.4;
+}
+.hard-mode-intro li {
+    margin: 6px 0;
+}
+.hard-mode-intro .mode-button {
+    display: block;
+    margin: 0 auto;
+}
+
 /* Utility hidden class */
 .hidden { display: none !important; }
 
