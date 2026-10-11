@@ -39,6 +39,14 @@ export function findListKey(item) {
     return null;
 }
 
+// Hard mode gives broader yellow clues: same testament instead of same area.
+// The first 39 books of BOOK_ORDER (Genesis to Malachi) are the Old Testament.
+export function findTestament(item) {
+    const i = BOOK_ORDER.indexOf(item);
+    if (i === -1) return null;
+    return i < 39 ? "Old Testament" : "New Testament";
+}
+
 export function sortBooks(books) {
     const rank = book => {
         const i = BOOK_ORDER.indexOf(book);
@@ -49,17 +57,19 @@ export function sortBooks(books) {
 
 // Book hints: narrows a list of books using the book clues from submitted
 // rows. clues is [{ book, color }] with color 'green' | 'yellow' | 'gray'.
-export function filterBooksByClues(books, clues) {
+// groupOf maps a book to the group yellow clues use (area, or testament in
+// hard mode).
+export function filterBooksByClues(books, clues, groupOf = findListKey) {
     const green = clues.find(c => c.color === 'green');
     if (green) return books.filter(b => b === green.book);
 
     const wrongBooks = new Set(clues.map(c => c.book));
-    const yellowArea = clues.filter(c => c.color === 'yellow').map(c => findListKey(c.book))[0];
-    const grayAreas = new Set(clues.filter(c => c.color === 'gray').map(c => findListKey(c.book)));
+    const yellowArea = clues.filter(c => c.color === 'yellow').map(c => groupOf(c.book))[0];
+    const grayAreas = new Set(clues.filter(c => c.color === 'gray').map(c => groupOf(c.book)));
 
     return books.filter(b => {
         if (wrongBooks.has(b)) return false;
-        const area = findListKey(b);
+        const area = groupOf(b);
         if (yellowArea) return area === yellowArea;
         return !grayAreas.has(area);
     });

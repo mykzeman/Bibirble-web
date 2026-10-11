@@ -47,7 +47,7 @@ It opens full screen with its own icon and keeps working offline after the first
 Color meanings (applies to both the book and the numeric digits):
 
 - **Grey** — the book is NOT correct or the digit is NOT in the verse.
-- **Yellow** — the book is NOT correct but is in the same area (see areas below), or the digit is in the verse but NOT in the right place.
+- **Yellow** — the book is NOT correct but is in the same area (see areas below; in hard mode, the same testament), or the digit is in the verse but NOT in the right place.
 - **Green** — the book is CORRECT or the digit is CORRECT and in the right place.
 
 Areas and books referenced by the game:

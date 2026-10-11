@@ -57,7 +57,11 @@ export async function initGame(options = { mode: 'daily' }) {
             seedVal = getDailySeed();
         } else {
             if (options.seed !== undefined && options.seed !== null && options.seed !== '') {
-                seedVal = typeof options.seed === 'number' ? options.seed : hashStringToInt(String(options.seed));
+                // Number seeds (like the one shown after a game) are used as-is so
+                // a shared seed replays the same verse; other text is hashed.
+                const seedText = String(options.seed).trim();
+                seedVal = typeof options.seed === 'number' ? options.seed
+                    : /^\d{1,9}$/.test(seedText) ? Number(seedText) : hashStringToInt(seedText);
             } else {
                 seedVal = Math.floor(Math.random() * 1e9);
             }

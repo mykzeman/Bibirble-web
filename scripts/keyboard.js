@@ -1,4 +1,4 @@
-import { FinalSubmit } from "./game.js";
+import { onSubmitPressed } from "./game.js";
 
 let lastFocusedInput = null;
 
@@ -46,21 +46,9 @@ function keyboardInput(key) {
     // Only allow typing in text inputs
     if (!focusedElement || focusedElement.tagName !== "INPUT" || focusedElement.disabled) return;
     
-    const SPECIAL_KEYS = ["Del", 'Submit Answer'];
-    
-    if (SPECIAL_KEYS.includes(key)) {
-        switch (key) {
-            case "Del":
-                focusedElement.value = '';
-                focusLastInput();
-                break;
-  
-            case "Submit Answer":
-                FinalSubmit();
-                break;
-            default:
-                break;
-        }
+    if (key === "Del") {
+        focusedElement.value = '';
+        focusLastInput();
     } else {
         focusedElement.value = key;
         // Auto-advance
@@ -68,7 +56,7 @@ function keyboardInput(key) {
     }
 }
 
-document.querySelectorAll('.button').forEach(button => {
+document.querySelectorAll('.keyboard-panel .button').forEach(button => {
     const handleInteraction = (e) => {
         if (e.type === 'touchstart') {
             e.preventDefault();
@@ -81,3 +69,14 @@ document.querySelectorAll('.button').forEach(button => {
     button.addEventListener('touchstart', handleInteraction, { passive: false });
     button.addEventListener('click', handleInteraction);
 });
+
+// Submit / Share button. Uses a plain click (not touchstart) because sharing
+// and copying need a real tap to be allowed on phones.
+const submitButton = document.getElementById('submit');
+if (submitButton) {
+    submitButton.addEventListener('mousedown', (e) => e.preventDefault());
+    submitButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        onSubmitPressed();
+    });
+}

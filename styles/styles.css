@@ -404,6 +404,39 @@ body {
 .switch input:checked + .slider:before {
     transform: translateX(22px);
 }
+/* Game toolbar: back button and book areas reference */
+.game-toolbar {
+    width: 92%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.areas-ref {
+    flex: 1;
+    min-width: 0;
+    background: white;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #333;
+}
+.areas-ref summary {
+    cursor: pointer;
+    font-weight: bold;
+}
+.areas-help {
+    margin: 6px 0;
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+.areas-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
 /* Utility hidden class */
 .hidden { display: none !important; }
 

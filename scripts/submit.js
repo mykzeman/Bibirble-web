@@ -1,4 +1,4 @@
-import { findListKey, filterBooksByClues } from "./books.js";
+import { findListKey, findTestament, filterBooksByClues } from "./books.js";
 
 function getGameRows(rowIndex) {
     const gameRow = document.querySelectorAll(".game-row")[rowIndex];
@@ -29,6 +29,9 @@ export function setRow(currentStage, verse, options = {}) {
         const activeRow = rowElements[currentStage];
         const nextRow = rowElements[currentStage + 1];
 
+        // Yellow book clues mean "same area", or "same testament" in hard mode.
+        const groupOf = options.hardMode ? findTestament : findListKey;
+
         // Hard-mode enforcement: validate guess against previous clues and dataset before accepting
         if (options.hardMode) {
             // Build constraints from previous rows
@@ -44,7 +47,7 @@ export function setRow(currentStage, verse, options = {}) {
                 if (bookBg === 'green') {
                     requiredBook = bookOpt.value;
                 } else if (bookBg === 'yellow') {
-                    requiredArea = requiredArea || findListKey(bookOpt.value);
+                    requiredArea = requiredArea || groupOf(bookOpt.value);
                 }
 
                 const ctrls = row.querySelectorAll('.text-ctrl');
@@ -62,8 +65,8 @@ export function setRow(currentStage, verse, options = {}) {
                 alert('Hard mode: your guess must use the previously confirmed book.');
                 return currentStage;
             }
-            if (requiredArea && findListKey(guessBook) !== requiredArea) {
-                alert('Hard mode: your guess must match the previously hinted book area.');
+            if (requiredArea && groupOf(guessBook) !== requiredArea) {
+                alert('Hard mode: your guess must be in the previously hinted testament.');
                 return currentStage;
             }
 
@@ -113,7 +116,7 @@ export function setRow(currentStage, verse, options = {}) {
             bookOption.style.backgroundColor = "green";
             bookOption.style.color = "white";
             correctCount++;
-        } else if (findListKey(bookGuess) === verse.area) {
+        } else if (groupOf(bookGuess) === groupOf(verse.book)) {
             bookOption.style.backgroundColor = "yellow";
             bookOption.style.color = "black";
         } else {
@@ -173,9 +176,9 @@ export function setRow(currentStage, verse, options = {}) {
             }
         });
 
-        // --- Book hints (accessibility, never in hard mode) ---
-        if (options.bookHints && !options.hardMode) {
-            applyBookHints(rowElements, currentStage);
+        // --- Book hints (accessibility) ---
+        if (options.bookHints) {
+            applyBookHints(rowElements, currentStage, groupOf);
         }
 
         // --- Check Win/Loss ---
@@ -197,7 +200,7 @@ export function setRow(currentStage, verse, options = {}) {
 
 // Rebuilds the book dropdowns of the rows after currentStage so they only
 // offer books that still fit the book clues given so far.
-function applyBookHints(rowElements, currentStage) {
+function applyBookHints(rowElements, currentStage, groupOf) {
     const clues = [];
     for (let r = 0; r <= currentStage; r++) {
         const select = rowElements[r].querySelector('.choice');
@@ -206,7 +209,7 @@ function applyBookHints(rowElements, currentStage) {
     for (let r = currentStage + 1; r < rowElements.length; r++) {
         const select = rowElements[r].querySelector('.choice');
         const allBooks = (select.dataset.allBooks || '').split(',').filter(Boolean);
-        const books = filterBooksByClues(allBooks, clues);
+        const books = filterBooksByClues(allBooks, clues, groupOf);
         const current = select.value;
         select.innerHTML = '<option value=""></option>';
         books.forEach(book => {
