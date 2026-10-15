@@ -24,8 +24,22 @@ function createSeededRandom(seed) {
     };
 }
 
+// Scrambles a seed (murmur3's finalizer) so nearby seeds, like the hashes of
+// consecutive dates or seeds 1000 and 1001, land far apart. Without this the
+// daily verse just walked forward a verse or two each day. Must match
+// MixSeed in bibirble's SeededRandom.cpp.
+function mixSeed(seed) {
+    let h = seed >>> 0;
+    h ^= h >>> 16;
+    h = Math.imul(h, 0x85ebca6b);
+    h ^= h >>> 13;
+    h = Math.imul(h, 0xc2b2ae35);
+    h ^= h >>> 16;
+    return (h >>> 0) || 0x9e3779b9; // xorshift gets stuck on 0
+}
+
 function pickIndexFromSeed(seed, length) {
-    const random = createSeededRandom(seed);
+    const random = createSeededRandom(mixSeed(seed));
     return Math.floor(random() * length);
 }
 
