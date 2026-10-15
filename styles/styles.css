@@ -161,18 +161,22 @@ body {
     padding-bottom: max(10px, env(safe-area-inset-bottom)); /* Handle iPhone Home Bar */
 }
 
-.keys-sizer-horizontal {
-    display: flex;
-    flex-direction: row;
+/* 3x4 phone keypad: 1 2 3 / 4 5 6 / 7 8 9 / 0 (wide) Del */
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
     height: 100%;
     gap: 6px;
 }
 
-.key-column {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    gap: 6px;
+.keypad .button {
+    background-color: rgba(0, 0, 0, 0.15); /* stands out from the panel */
+    font-size: 20px;
+}
+
+.keypad .key-wide {
+    grid-column: span 2;
 }
 
 /*
