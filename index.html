@@ -35,6 +35,8 @@
                 <summary>✨ What's New <span class="whats-new-hint">tap to show</span></summary>
                 <!-- Keep each feature to at most two lines on a phone screen. See CLAUDE.md. -->
                 <ul class="whats-new-list">
+                    <li><strong>Keypad:</strong> 1-2-3 across, like a phone.</li>
+                    <li><strong>Auto update:</strong> the app gets fixes by itself.</li>
                     <li><strong>Daily fix:</strong> verses jump all over the Bible.</li>
                     <li><strong>1200 useful verses:</strong> up from 365!</li>
                     <li><strong>Book list:</strong> only books in your verse pool.</li>
@@ -238,35 +240,19 @@
 
         <!-- Keyboard Panel -->
         <div class="keyboard-panel hidden">
-            <div class="keys-sizer-horizontal">
-                
-                <!-- Column 1 -->
-                <div class="key-column">
-                    <button class="button">1</button>
-                    <button class="button">2</button>
-                    <button class="button">3</button>
-                </div>
-
-                <!-- Column 2 -->
-                <div class="key-column">
-                    <button class="button">4</button>
-                    <button class="button">5</button>
-                    <button class="button">6</button>
-                </div>
-
-                <!-- Column 3 -->
-                <div class="key-column">
-                    <button class="button">7</button>
-                    <button class="button">8</button>
-                    <button class="button">9</button>
-                </div>
-
-                <!-- Column 4 -->
-                <div class="key-column">
-                    <button class="button">0</button>
-                    <button class="button">Del</button>
-                </div>
-
+            <!-- Phone keypad layout: 1-2-3 across the top, 0 and Del on the bottom row -->
+            <div class="keypad">
+                <button class="button">1</button>
+                <button class="button">2</button>
+                <button class="button">3</button>
+                <button class="button">4</button>
+                <button class="button">5</button>
+                <button class="button">6</button>
+                <button class="button">7</button>
+                <button class="button">8</button>
+                <button class="button">9</button>
+                <button class="button key-wide">0</button>
+                <button class="button">Del</button>
             </div>
         </div>
 
@@ -282,8 +268,36 @@
     // Installable app: offline support via service worker (skipped on file://)
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
+            navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
+                // Phone apps resume without reloading, so check for a new
+                // version whenever the app comes back to the screen.
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') reg.update().catch(() => {});
+                });
+            }).catch(() => {});
         });
+
+        // A new version took over: reload to run it, but never mid-game.
+        // Waits until the player is back on the menu.
+        let updateReady = false;
+        let hadController = !!navigator.serviceWorker.controller;
+        const onMenu = () => {
+            const start = document.getElementById('start-screen');
+            return !start || !start.classList.contains('hidden');
+        };
+        const reloadIfReady = () => {
+            if (updateReady && onMenu()) location.reload();
+        };
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!hadController) { // first install: this page is already up to date
+                hadController = true;
+                return;
+            }
+            updateReady = true;
+            reloadIfReady();
+        });
+        document.addEventListener('visibilitychange', reloadIfReady);
+        document.addEventListener('click', () => setTimeout(reloadIfReady, 0));
     }
 </script>
 </html>
