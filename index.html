@@ -35,6 +35,7 @@
                 <summary>✨ What's New <span class="whats-new-hint">tap to show</span></summary>
                 <!-- Keep each feature to at most two lines on a phone screen. See CLAUDE.md. -->
                 <ul class="whats-new-list">
+                    <li><strong>Auto update:</strong> the app gets fixes by itself.</li>
                     <li><strong>Daily fix:</strong> verses jump all over the Bible.</li>
                     <li><strong>1200 useful verses:</strong> up from 365!</li>
                     <li><strong>Book list:</strong> only books in your verse pool.</li>
@@ -282,8 +283,36 @@
     // Installable app: offline support via service worker (skipped on file://)
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
+            navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
+                // Phone apps resume without reloading, so check for a new
+                // version whenever the app comes back to the screen.
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') reg.update().catch(() => {});
+                });
+            }).catch(() => {});
         });
+
+        // A new version took over: reload to run it, but never mid-game.
+        // Waits until the player is back on the menu.
+        let updateReady = false;
+        let hadController = !!navigator.serviceWorker.controller;
+        const onMenu = () => {
+            const start = document.getElementById('start-screen');
+            return !start || !start.classList.contains('hidden');
+        };
+        const reloadIfReady = () => {
+            if (updateReady && onMenu()) location.reload();
+        };
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!hadController) { // first install: this page is already up to date
+                hadController = true;
+                return;
+            }
+            updateReady = true;
+            reloadIfReady();
+        });
+        document.addEventListener('visibilitychange', reloadIfReady);
+        document.addEventListener('click', () => setTimeout(reloadIfReady, 0));
     }
 </script>
 </html>
