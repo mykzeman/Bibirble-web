@@ -76,8 +76,9 @@ export async function initGame(options = { mode: 'daily' }) {
         const idx = candidates[pickIndexFromSeed(seedVal, candidates.length)];
         const verse = bibleData[idx];
         
-        // Populate Dropdowns once
-        const uniqueValues = sortBooks(new Set(bibleData.map(item => item.book)));
+        // Populate the dropdowns with only the books that have a verse in
+        // this game's pool, so Useful mode doesn't offer impossible books.
+        const uniqueValues = sortBooks(new Set(candidates.map(i => bibleData[i].book)));
         document.querySelectorAll(".choice").forEach(el => {
             // Full list, kept so book hints can rebuild the dropdown later.
             el.dataset.allBooks = uniqueValues.join(',');
