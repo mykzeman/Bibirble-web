@@ -39,12 +39,46 @@ export function findListKey(item) {
     return null;
 }
 
-// Hard mode gives broader yellow clues: same testament instead of same area.
-// The first 39 books of BOOK_ORDER (Genesis to Malachi) are the Old Testament.
-export function findTestament(item) {
-    const i = BOOK_ORDER.indexOf(item);
-    if (i === -1) return null;
-    return i < 39 ? "Old Testament" : "New Testament";
+// Hard mode groups books by who traditionally wrote them, so a yellow book
+// means "same author". Books whose writer isn't known share "Unknown".
+export const AUTHORS = {
+    "Moses": ["genesis", "exodus", "leviticus", "numbers", "deuteronomy"],
+    "Joshua": ["joshua"],
+    "Samuel": ["judges", "ruth", "1samuel", "2samuel"],
+    "Jeremiah": ["1kings", "2kings", "jeremiah", "lamentations"],
+    "Ezra and Nehemiah": ["1chronicles", "2chronicles", "ezra", "nehemiah"],
+    "David": ["psalms"],
+    "Solomon": ["proverbs", "ecclesiastes", "songofsolomon"],
+    "Isaiah": ["isaiah"],
+    "Ezekiel": ["ezekiel"],
+    "Daniel": ["daniel"],
+    "Hosea": ["hosea"],
+    "Joel": ["joel"],
+    "Amos": ["amos"],
+    "Obadiah": ["obadiah"],
+    "Jonah": ["jonah"],
+    "Micah": ["micah"],
+    "Nahum": ["nahum"],
+    "Habakkuk": ["habakkuk"],
+    "Zephaniah": ["zephaniah"],
+    "Haggai": ["haggai"],
+    "Zechariah": ["zechariah"],
+    "Malachi": ["malachi"],
+    "Matthew": ["matthew"],
+    "Mark": ["mark"],
+    "Luke": ["luke", "acts"],
+    "John": ["john", "1john", "2john", "3john", "revelation"],
+    "Paul": ["romans", "1corinthians", "2corinthians", "galatians", "ephesians", "philippians", "colossians", "1thessalonians", "2thessalonians", "1timothy", "2timothy", "titus", "philemon"],
+    "Peter": ["1peter", "2peter"],
+    "Jesus' brothers": ["james", "jude"],
+    "Unknown": ["job", "esther", "hebrews"]
+};
+
+export function findAuthor(item) {
+    for (const author in AUTHORS) {
+        if (AUTHORS[author].includes(item)) return author;
+    }
+    return null;
 }
 
 export function sortBooks(books) {
@@ -57,7 +91,7 @@ export function sortBooks(books) {
 
 // Book hints: narrows a list of books using the book clues from submitted
 // rows. clues is [{ book, color }] with color 'green' | 'yellow' | 'gray'.
-// groupOf maps a book to the group yellow clues use (area, or testament in
+// groupOf maps a book to the group yellow clues use (area, or author in
 // hard mode).
 export function filterBooksByClues(books, clues, groupOf = findListKey) {
     const green = clues.find(c => c.color === 'green');

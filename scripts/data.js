@@ -43,9 +43,19 @@ function pickIndexFromSeed(seed, length) {
     return Math.floor(random() * length);
 }
 
+// The Daily follows the player's own calendar day (like Wordle), so it
+// resets at their midnight instead of UTC midnight. Players behind UTC used
+// to play "tomorrow's" Daily in the evening and then wait almost a full day.
+// Must match GetTodayLocalDateString in bibirble's SeededRandom.cpp.
+export function getLocalDateKey(date = new Date()) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
 function getDailySeed() {
-    const today = new Date().toISOString().slice(0, 10);
-    return hashStringToInt(today);
+    return hashStringToInt(getLocalDateKey());
 }
 
 // Indices into bibleData that make up the "Useful verses only" pool, in
