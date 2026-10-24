@@ -1,6 +1,6 @@
 import { initGame, submitFromData } from "./data.js";
 import { share } from "./answer.js";
-import { AREAS, AUTHORS } from "./books.js";
+import { AREAS } from "./books.js";
 
 var stage = 0;
 var targetIndex = 0;
@@ -128,25 +128,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const areasRef = document.getElementById('areas-ref');
     let settingsReturnTo = 'menu';
 
-    // Book groups reference: what a yellow book clue means (areas, or
-    // authors in hard mode).
+    // Book areas reference (what a yellow book clue means outside hard mode)
     const areasList = document.getElementById('areas-list');
-    const areasTitle = document.getElementById('areas-title');
-    const areasHelp = document.getElementById('areas-help');
-    function showBookGroups(hardMode) {
-        if (!areasList) return;
-        areasList.innerHTML = '';
-        Object.entries(hardMode ? AUTHORS : AREAS).forEach(([group, books]) => {
+    if (areasList) {
+        Object.entries(AREAS).forEach(([area, books]) => {
             const item = areasList.appendChild(document.createElement('li'));
-            item.appendChild(document.createElement('strong')).textContent = group + ': ';
+            item.appendChild(document.createElement('strong')).textContent = area + ': ';
             item.appendChild(document.createTextNode(books.join(', ')));
         });
-        if (areasTitle) areasTitle.textContent = hardMode ? 'Book authors' : 'Book areas';
-        if (areasHelp) {
-            areasHelp.textContent = hardMode
-                ? 'A yellow book means the answer has the same author.'
-                : 'A yellow book means the answer is in the same area.';
-        }
     }
 
     if (startDailyBtn) {
@@ -288,9 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
         pushScreenEntry();
         // Main Menu button: random games only, never daily or hard mode.
         updateTopBar();
-        // Book groups reference: areas, or authors in hard mode.
-        showBookGroups(currentHardMode);
-        if (areasRef) areasRef.open = false;
+        // Areas reference: not in hard mode.
+        if (areasRef) {
+            areasRef.classList.toggle('hidden', currentHardMode);
+            areasRef.open = false;
+        }
 
         const opts = { mode: currentMode, usefulOnly: currentUsefulOnly, allowMature: currentAllowMature };
         const seedVal = seedInput && seedInput.value ? seedInput.value.trim() : '';

@@ -115,7 +115,7 @@
                     <li>Only real Bible verses can be guessed.</li>
                     <li>Keep green digits in place and reuse yellow digits.</li>
                     <li>Keep a green book. A yellow book means the <strong>same author</strong> (like Moses or Paul), not the same area.</li>
-                    <li>No Main Menu button until the game ends.</li>
+                    <li>No book areas list, and no Main Menu button until the game ends. Book hints still work if you turn them on.</li>
                 </ul>
             </details>
             <details class="menu-info-card whats-new-card">
@@ -154,7 +154,7 @@
                 <li>Only real Bible verses can be guessed.</li>
                 <li>Keep green digits in place and reuse yellow digits.</li>
                 <li>Keep a green book. A yellow book means the answer has the <strong>same author</strong> (like Moses or Paul), not the same area.</li>
-                <li>No Main Menu button until the game ends. The book list shows authors instead of areas.</li>
+                <li>No book areas list, and no Main Menu button until the game ends. Book hints still work if you turn them on.</li>
             </ul>
             <button id="hard-mode-intro-ok" class="mode-button"><span class="icon" aria-hidden="true">check</span> Got it!</button>
         </dialog>
@@ -168,11 +168,11 @@
 
         <!-- Scrollable Game Area -->
         <div class="game-scroll-area hidden">
-            <!-- Game toolbar: book areas reference (book authors in hard mode) -->
+            <!-- Game toolbar: book areas reference (not in hard mode) -->
             <div class="game-toolbar">
-                <details id="areas-ref" class="areas-ref">
-                    <summary><span class="icon" aria-hidden="true">menu_book</span> <span id="areas-title">Book areas</span></summary>
-                    <p id="areas-help" class="areas-help">A yellow book means the answer is in the same area.</p>
+                <details id="areas-ref" class="areas-ref hidden">
+                    <summary><span class="icon" aria-hidden="true">menu_book</span> Book areas</summary>
+                    <p class="areas-help">A yellow book means the answer is in the same area.</p>
                     <ul id="areas-list" class="areas-list"></ul>
                 </details>
             </div>
