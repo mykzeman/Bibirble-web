@@ -56,12 +56,13 @@ function keyboardInput(key) {
     }
 }
 
-document.querySelectorAll('.keyboard-panel .button').forEach(button => {
+// Digit and Del keys (Enter is the submit button, wired up below).
+document.querySelectorAll('.keyboard-panel .button:not(#submit)').forEach(button => {
     const handleInteraction = (e) => {
         if (e.type === 'touchstart') {
             e.preventDefault();
         }
-        const key = button.innerHTML;
+        const key = button.dataset.key || button.textContent.trim();
         keyboardInput(key);
     };
 

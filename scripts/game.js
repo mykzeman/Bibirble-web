@@ -1,6 +1,6 @@
 import { initGame, submitFromData } from "./data.js";
 import { share } from "./answer.js";
-import { AREAS } from "./books.js";
+import { AREAS, AUTHORS } from "./books.js";
 
 var stage = 0;
 var targetIndex = 0;
@@ -14,6 +14,31 @@ var gameOver = false;
 
 function getTodayKey() {
     return new Date().toISOString().slice(0, 10);
+}
+
+// The Main Menu button (above the title) only shows when leaving is allowed:
+// Random games outside hard mode, or any game that's over.
+function canLeaveGame() {
+    return gameOver || (currentMode === 'random' && !currentHardMode);
+}
+
+function updateTopBar() {
+    const topBar = document.getElementById('game-top-bar');
+    if (topBar) topBar.classList.toggle('hidden', !canLeaveGame());
+}
+
+// Shows the digit keys and Enter while playing, or one big Share key once the
+// game is over.
+function setKeypadGameOver(over) {
+    const keyboard = document.querySelector('.keyboard-panel');
+    if (keyboard) keyboard.classList.toggle('game-over', over);
+    const submit = document.getElementById('submit');
+    if (!submit) return;
+    submit.disabled = false;
+    submit.innerHTML = over
+        ? '<span class="icon" aria-hidden="true">share</span> Share'
+        : '<span class="icon" aria-hidden="true">keyboard_return</span>';
+    submit.setAttribute('aria-label', over ? 'Share' : 'Submit Answer');
 }
 
 function lockGameForToday() {
@@ -103,14 +128,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const areasRef = document.getElementById('areas-ref');
     let settingsReturnTo = 'menu';
 
-    // Book areas reference (what a yellow book clue means outside hard mode)
+    // Book groups reference: what a yellow book clue means (areas, or
+    // authors in hard mode).
     const areasList = document.getElementById('areas-list');
-    if (areasList) {
-        Object.entries(AREAS).forEach(([area, books]) => {
+    const areasTitle = document.getElementById('areas-title');
+    const areasHelp = document.getElementById('areas-help');
+    function showBookGroups(hardMode) {
+        if (!areasList) return;
+        areasList.innerHTML = '';
+        Object.entries(hardMode ? AUTHORS : AREAS).forEach(([group, books]) => {
             const item = areasList.appendChild(document.createElement('li'));
-            item.appendChild(document.createElement('strong')).textContent = area + ': ';
+            item.appendChild(document.createElement('strong')).textContent = group + ': ';
             item.appendChild(document.createTextNode(books.join(', ')));
         });
+        if (areasTitle) areasTitle.textContent = hardMode ? 'Book authors' : 'Book areas';
+        if (areasHelp) {
+            areasHelp.textContent = hardMode
+                ? 'A yellow book means the answer has the same author.'
+                : 'A yellow book means the answer is in the same area.';
+        }
     }
 
     if (startDailyBtn) {
@@ -173,19 +209,74 @@ document.addEventListener('DOMContentLoaded', () => {
             if (startScreen) startScreen.classList.add('hidden');
             if (settingsScreen) settingsScreen.classList.remove('hidden');
             settingsReturnTo = 'menu';
+            pushScreenEntry();
         });
+    }
+
+    function closeSettings() {
+        if (settingsScreen) settingsScreen.classList.add('hidden');
+        if (settingsReturnTo === 'menu' && startScreen) {
+            startScreen.classList.remove('hidden');
+        } else if (settingsReturnTo === 'game' && gameArea) {
+            gameArea.classList.remove('hidden');
+            if (keyboard) keyboard.classList.remove('hidden');
+        }
     }
 
     if (settingsBackBtn) {
         settingsBackBtn.addEventListener('click', () => {
-            if (settingsScreen) settingsScreen.classList.add('hidden');
-            if (settingsReturnTo === 'menu' && startScreen) {
-                startScreen.classList.remove('hidden');
-            } else if (settingsReturnTo === 'game' && gameArea) {
-                gameArea.classList.remove('hidden');
-                if (keyboard) keyboard.classList.remove('hidden');
-            }
+            closeSettings();
+            popScreenEntry();
         });
+    }
+
+    // Phone back button: the game and settings screens each get a history
+    // entry, so back returns to the menu instead of closing the app. An
+    // unfinished Daily (or hard mode) game puts the entry straight back, so
+    // back can't be used to skip out of it.
+    function pushScreenEntry() {
+        if (!(history.state && history.state.bibirbleScreen)) {
+            history.pushState({ bibirbleScreen: true }, '');
+        }
+    }
+
+    // Drops our entry after leaving with an on-screen button, so the next
+    // back press isn't swallowed.
+    function popScreenEntry() {
+        if (history.state && history.state.bibirbleScreen) history.back();
+    }
+
+    window.addEventListener('popstate', () => {
+        const inGame = gameArea && !gameArea.classList.contains('hidden');
+        const inSettings = settingsScreen && !settingsScreen.classList.contains('hidden');
+        if (inGame) {
+            if (canLeaveGame()) {
+                goToMainMenu(false);
+            } else {
+                history.pushState({ bibirbleScreen: true }, '');
+                showToast(currentMode === 'daily'
+                    ? 'Finish the Daily challenge first!'
+                    : 'Finish this hard mode game first!');
+            }
+        } else if (inSettings) {
+            closeSettings();
+        }
+    });
+
+    let toastTimer = null;
+    function showToast(text) {
+        let toast = document.getElementById('toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast';
+            toast.className = 'toast';
+            toast.setAttribute('role', 'status');
+            document.body.appendChild(toast);
+        }
+        toast.textContent = text;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
     // Show timer for daily mode (UTC-based)
@@ -194,13 +285,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function startGameFromUI(forceNewRandom = false) {
         // Reset UI rows before starting
         resetGameUI();
-        // Back button: random games only, never daily or hard mode.
-        if (backMenuBtn) backMenuBtn.classList.toggle('hidden', currentMode !== 'random' || currentHardMode);
-        // Areas reference: not in hard mode (yellow means same testament there).
-        if (areasRef) {
-            areasRef.classList.toggle('hidden', currentHardMode);
-            areasRef.open = false;
-        }
+        pushScreenEntry();
+        // Main Menu button: random games only, never daily or hard mode.
+        updateTopBar();
+        // Book groups reference: areas, or authors in hard mode.
+        showBookGroups(currentHardMode);
+        if (areasRef) areasRef.open = false;
 
         const opts = { mode: currentMode, usefulOnly: currentUsefulOnly, allowMature: currentAllowMature };
         const seedVal = seedInput && seedInput.value ? seedInput.value.trim() : '';
@@ -234,7 +324,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Post-game controls wiring
-    const btnMain = document.getElementById('btn-main-menu');
     const btnPlayRandom = document.getElementById('btn-play-random');
     const btnViewSeed = document.getElementById('btn-view-seed');
     const postGame = document.getElementById('post-game-controls');
@@ -266,21 +355,22 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        const submit = document.getElementById('submit');
-        if (submit) { submit.innerText = 'Submit Answer'; submit.disabled = false; }
+        setKeypadGameOver(false);
         if (postGame) postGame.classList.add('hidden');
     }
 
-    function goToMainMenu() {
+    function goToMainMenu(fromButton = true) {
         resetGameUI();
         if (gameArea) gameArea.classList.add('hidden');
         if (keyboard) keyboard.classList.add('hidden');
         if (startScreen) startScreen.classList.remove('hidden');
+        const topBar = document.getElementById('game-top-bar');
+        if (topBar) topBar.classList.add('hidden');
         settingsReturnTo = 'menu';
+        if (fromButton) popScreenEntry();
     }
 
-    if (btnMain) btnMain.addEventListener('click', goToMainMenu);
-    if (backMenuBtn) backMenuBtn.addEventListener('click', goToMainMenu);
+    if (backMenuBtn) backMenuBtn.addEventListener('click', () => goToMainMenu());
 
     if (btnPlayRandom) btnPlayRandom.addEventListener('click', async () => {
         // Start another random game
@@ -329,11 +419,8 @@ export function FinalSubmit() {
             localStorage.setItem('lastPlayedDaily', today);
         }
         gameOver = true;
-        const submit = document.getElementById('submit');
-        if (submit) {
-            submit.innerText = 'Share';
-            submit.disabled = false;
-        }
+        setKeypadGameOver(true);
+        updateTopBar();
         // Show post-game controls
         const postGame = document.getElementById('post-game-controls');
         if (postGame) postGame.classList.remove('hidden');

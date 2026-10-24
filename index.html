@@ -13,12 +13,18 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="preload" href="fonts/material-symbols-rounded.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
 
     <!-- Main Window (Frame) -->
     <div class="frame">
+
+        <!-- Game top bar: the way back to the menu sits above the title while playing -->
+        <div id="game-top-bar" class="game-top-bar hidden">
+            <button id="btn-back-menu" class="small-button"><span class="icon" aria-hidden="true">home</span> Main Menu</button>
+        </div>
 
         <!-- Header -->
         <div class="header-text">Bibirble</div>
@@ -27,55 +33,21 @@
         <div id="start-screen" class="start-screen">
             <div class="start-headline">Choose a mode to begin</div>
             <div class="start-actions">
-                <button id="start-daily" class="mode-button">Start Daily</button>
-                <button id="start-random" class="mode-button">Start Random</button>
-                <button id="open-settings" class="mode-button secondary-button">Settings</button>
+                <button id="start-daily" class="mode-button"><span class="icon" aria-hidden="true">calendar_today</span> Start Daily</button>
+                <button id="start-random" class="mode-button"><span class="icon" aria-hidden="true">shuffle</span> Start Random</button>
+                <button id="open-settings" class="mode-button secondary-button"><span class="icon" aria-hidden="true">settings</span> Settings</button>
             </div>
-            <details class="menu-info-card whats-new-card">
-                <summary>✨ What's New <span class="whats-new-hint">tap to show</span></summary>
-                <!-- Keep each feature to at most two lines on a phone screen. See CLAUDE.md. -->
-                <ul class="whats-new-list">
-                    <li><strong>Keypad:</strong> 1-2-3 across, like a phone.</li>
-                    <li><strong>Auto update:</strong> the app gets fixes by itself.</li>
-                    <li><strong>Daily fix:</strong> verses jump all over the Bible.</li>
-                    <li><strong>1200 useful verses:</strong> up from 365!</li>
-                    <li><strong>Book list:</strong> only books in your verse pool.</li>
-                    <li><strong>Hard mode guide:</strong> rules pop up on your first game.</li>
-                    <li><strong>Back button:</strong> leave Random games anytime.</li>
-                    <li><strong>Book areas:</strong> see what yellow books mean.</li>
-                    <li><strong>Hard mode:</strong> yellow = same testament.</li>
-                    <li><strong>Sharing:</strong> fixed on phones, no spoilers.</li>
-                    <li><strong>R18 mode:</strong> 18+ can allow mature verses.</li>
-                    <li><strong>Book hints:</strong> book list fits your clues.</li>
-                    <li><strong>Bible order:</strong> Genesis to Revelation.</li>
-                    <li><strong>Useful verses:</strong> well-known verses only.</li>
-                    <li><strong>Poetry:</strong> Psalms, Proverbs, Job and more.</li>
-                    <li><strong>Fixes:</strong> Nehemiah colors; full verses.</li>
-                </ul>
-            </details>
-            <div class="menu-info-card">
-                <h2>Game Overview</h2>
-                <p>Guess the verse by selecting the correct book and entering the chapter:verse digits. Green means exact match, yellow means correct digit in the wrong place, gray means not in the answer.</p>
-                <p>Daily challenges refresh at UTC midnight. Random games are replayable by seed. Hard mode only accepts valid verses, forces clues to be respected, and a yellow book means the same testament instead of the same area. Turn on "Useful verses only" in Settings to skip genealogies and lists and play only well-known verses.</p>
-                <div class="info-row">
-                    <span class="info-label">How to play:</span>
-                    <span class="info-value">Choose a book, then enter the four chapter/verse digits based on the clue.</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Seed hint:</span>
-                    <span class="info-value">Use the Settings screen to set or randomize a seed for replayable games.</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Next Daily:</span>
-                    <span id="timer" class="info-value"></span>
-                </div>
+            <div class="next-daily">
+                <span class="info-label">Next Daily:</span>
+                <span id="timer" class="info-value"></span>
             </div>
+            <p class="menu-hint">How to play and What's New are in Settings.</p>
         </div>
 
         <!-- Settings Screen -->
         <div id="settings-screen" class="settings-screen hidden">
             <div class="settings-header">
-                <button id="settings-back" class="small-button">Back</button>
+                <button id="settings-back" class="small-button"><span class="icon" aria-hidden="true">arrow_back</span> Back</button>
                 <div class="settings-title">Settings</div>
             </div>
             <div class="settings-card">
@@ -110,7 +82,7 @@
                 <div id="r18-verify" class="setting-row hidden">
                     <label for="r18-dob">Date of birth</label>
                     <input type="date" id="r18-dob" class="seed-input" />
-                    <button id="r18-confirm" class="small-button">Confirm</button>
+                    <button id="r18-confirm" class="small-button"><span class="icon" aria-hidden="true">check</span> Confirm</button>
                 </div>
                 <div id="r18-message" class="settings-note hidden" role="status"></div>
                 <div class="setting-row">
@@ -122,40 +94,85 @@
                     <span id="current-seed-display" class="info-value">none</span>
                 </div>
                 <div class="setting-row settings-row-action">
-                    <button id="settings-new-seed" class="mode-button secondary-button">Randomize Seed</button>
+                    <button id="settings-new-seed" class="mode-button secondary-button"><span class="icon" aria-hidden="true">casino</span> Randomize Seed</button>
                 </div>
                 <div class="settings-note">Seed settings, hard mode, useful verses only, book hints, and R18 mode apply to the next game you start. You can return here anytime.</div>
             </div>
+
+            <details class="menu-info-card help-card" open>
+                <summary><span class="icon" aria-hidden="true">help</span> How to Play</summary>
+                <p>Guess the verse by picking the book, then typing the chapter:verse digits on the keypad. Tap <span class="icon" aria-hidden="true">keyboard_return</span> to submit.</p>
+                <ul class="help-list">
+                    <li><strong>Green:</strong> right book, or right digit in the right place.</li>
+                    <li><strong>Yellow:</strong> a book in the same area, or a digit in the wrong place.</li>
+                    <li><strong>Gray:</strong> wrong book area, or a digit not in the answer.</li>
+                </ul>
+                <p>Daily challenges refresh at UTC midnight and must be finished once started. Random games can be replayed by seed. Turn on "Useful verses only" to skip genealogies and lists.</p>
+            </details>
+            <details class="menu-info-card help-card">
+                <summary><span class="icon" aria-hidden="true">fitness_center</span> Hard Mode</summary>
+                <ul class="help-list">
+                    <li>Only real Bible verses can be guessed.</li>
+                    <li>Keep green digits in place and reuse yellow digits.</li>
+                    <li>Keep a green book. A yellow book means the <strong>same author</strong> (like Moses or Paul), not the same area.</li>
+                    <li>No Main Menu button until the game ends.</li>
+                </ul>
+            </details>
+            <details class="menu-info-card whats-new-card">
+                <summary><span class="icon" aria-hidden="true">new_releases</span> What's New <span class="whats-new-hint">tap to show</span></summary>
+                <!-- Keep each feature to at most two lines on a phone screen. See CLAUDE.md. -->
+                <ul class="whats-new-list">
+                    <li><strong>Help in Settings:</strong> how to play and updates.</li>
+                    <li><strong>Daily lock:</strong> phone back can't skip it.</li>
+                    <li><strong>Hard mode:</strong> yellow = same author.</li>
+                    <li><strong>Enter key:</strong> submit from the keypad.</li>
+                    <li><strong>Icons:</strong> fresh new button icons.</li>
+                    <li><strong>Menu button:</strong> now above the title.</li>
+                    <li><strong>Keypad:</strong> 1-2-3 across, like a phone.</li>
+                    <li><strong>Auto update:</strong> the app gets fixes by itself.</li>
+                    <li><strong>Daily fix:</strong> verses jump all over the Bible.</li>
+                    <li><strong>1200 useful verses:</strong> up from 365!</li>
+                    <li><strong>Book list:</strong> only books in your verse pool.</li>
+                    <li><strong>Hard mode guide:</strong> rules pop up on your first game.</li>
+                    <li><strong>Back button:</strong> leave Random games anytime.</li>
+                    <li><strong>Book areas:</strong> see what yellow books mean.</li>
+                    <li><strong>Sharing:</strong> fixed on phones, no spoilers.</li>
+                    <li><strong>R18 mode:</strong> 18+ can allow mature verses.</li>
+                    <li><strong>Book hints:</strong> book list fits your clues.</li>
+                    <li><strong>Bible order:</strong> Genesis to Revelation.</li>
+                    <li><strong>Useful verses:</strong> well-known verses only.</li>
+                    <li><strong>Poetry:</strong> Psalms, Proverbs, Job and more.</li>
+                    <li><strong>Fixes:</strong> Nehemiah colors; full verses.</li>
+                </ul>
+            </details>
         </div>
 
         <!-- Hard mode guide: shown the first time a player starts a hard mode game -->
         <dialog id="hard-mode-intro" class="hard-mode-intro">
-            <h2>💪 Welcome to Hard Mode!</h2>
+            <h2><span class="icon" aria-hidden="true">fitness_center</span> Welcome to Hard Mode!</h2>
             <ul>
                 <li>Only real Bible verses can be guessed.</li>
                 <li>Keep green digits in place and reuse yellow digits.</li>
-                <li>Keep a green book. A yellow book means the answer is in the <strong>same testament</strong> (Old or New), not the same area.</li>
-                <li>No back button or book areas list. Book hints still work if you turn them on.</li>
+                <li>Keep a green book. A yellow book means the answer has the <strong>same author</strong> (like Moses or Paul), not the same area.</li>
+                <li>No Main Menu button until the game ends. The book list shows authors instead of areas.</li>
             </ul>
-            <button id="hard-mode-intro-ok" class="mode-button">Got it!</button>
+            <button id="hard-mode-intro-ok" class="mode-button"><span class="icon" aria-hidden="true">check</span> Got it!</button>
         </dialog>
 
         <!-- Reveal Panel -->
         <div id="reveal-panel"></div>
         <div id="post-game-controls" class="hidden" style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
-            <button id="btn-main-menu" class="mode-button">Main Menu</button>
-            <button id="btn-play-random" class="mode-button">Play Random</button>
-            <button id="btn-view-seed" class="mode-button">View / Set Seed</button>
+            <button id="btn-play-random" class="mode-button"><span class="icon" aria-hidden="true">shuffle</span> Play Random</button>
+            <button id="btn-view-seed" class="mode-button"><span class="icon" aria-hidden="true">tag</span> View / Set Seed</button>
         </div>
 
         <!-- Scrollable Game Area -->
         <div class="game-scroll-area hidden">
-            <!-- Game toolbar: back button (random only) and book areas reference (not in hard mode) -->
+            <!-- Game toolbar: book areas reference (book authors in hard mode) -->
             <div class="game-toolbar">
-                <button id="btn-back-menu" class="small-button hidden">&larr; Main Menu</button>
-                <details id="areas-ref" class="areas-ref hidden">
-                    <summary>📖 Book areas</summary>
-                    <p class="areas-help">A yellow book means the answer is in the same area.</p>
+                <details id="areas-ref" class="areas-ref">
+                    <summary><span class="icon" aria-hidden="true">menu_book</span> <span id="areas-title">Book areas</span></summary>
+                    <p id="areas-help" class="areas-help">A yellow book means the answer is in the same area.</p>
                     <ul id="areas-list" class="areas-list"></ul>
                 </details>
             </div>
@@ -234,13 +251,11 @@
                 <input type="text" class="text-ctrl" disabled inputmode="none">
                 <input type="text" class="text-ctrl" disabled inputmode="none">
             </div>
-            
-            <button type="submit" class="button" id="submit">Submit Answer</button>
         </div>
 
         <!-- Keyboard Panel -->
         <div class="keyboard-panel hidden">
-            <!-- Phone keypad layout: 1-2-3 across the top, 0 and Del on the bottom row -->
+            <!-- Phone keypad layout: 1-2-3 across the top; Del, 0 and Enter (submit) on the bottom row -->
             <div class="keypad">
                 <button class="button">1</button>
                 <button class="button">2</button>
@@ -251,8 +266,9 @@
                 <button class="button">7</button>
                 <button class="button">8</button>
                 <button class="button">9</button>
-                <button class="button key-wide">0</button>
-                <button class="button">Del</button>
+                <button class="button" data-key="Del" aria-label="Delete"><span class="icon" aria-hidden="true">backspace</span></button>
+                <button class="button">0</button>
+                <button type="submit" class="button key-enter" id="submit" aria-label="Submit Answer"><span class="icon" aria-hidden="true">keyboard_return</span></button>
             </div>
         </div>
 

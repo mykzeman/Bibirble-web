@@ -42,9 +42,6 @@ export async function share(info = {}) {
     heading.innerText = "Copy the following text if automatic copying doesn't work!";
     const p = view.appendChild(document.createElement("p"));
     p.innerText = shareText;
-    // Make room for the share text
-    const keyboard = document.querySelector(".keyboard-panel");
-    if (keyboard) keyboard.classList.add("hidden");
 
     if (navigator.share) {
         try {

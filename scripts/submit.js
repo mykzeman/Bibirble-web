@@ -1,4 +1,4 @@
-import { findListKey, findTestament, filterBooksByClues } from "./books.js";
+import { findListKey, findAuthor, filterBooksByClues } from "./books.js";
 
 function getGameRows(rowIndex) {
     const gameRow = document.querySelectorAll(".game-row")[rowIndex];
@@ -29,8 +29,8 @@ export function setRow(currentStage, verse, options = {}) {
         const activeRow = rowElements[currentStage];
         const nextRow = rowElements[currentStage + 1];
 
-        // Yellow book clues mean "same area", or "same testament" in hard mode.
-        const groupOf = options.hardMode ? findTestament : findListKey;
+        // Yellow book clues mean "same area", or "same author" in hard mode.
+        const groupOf = options.hardMode ? findAuthor : findListKey;
 
         // Hard-mode enforcement: validate guess against previous clues and dataset before accepting
         if (options.hardMode) {
@@ -66,7 +66,7 @@ export function setRow(currentStage, verse, options = {}) {
                 return currentStage;
             }
             if (requiredArea && groupOf(guessBook) !== requiredArea) {
-                alert('Hard mode: your guess must be in the previously hinted testament.');
+                alert('Hard mode: your guess must be in the previously hinted author.');
                 return currentStage;
             }
 
