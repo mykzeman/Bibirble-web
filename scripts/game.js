@@ -1,4 +1,4 @@
-import { initGame, submitFromData } from "./data.js";
+import { initGame, submitFromData, getLocalDateKey } from "./data.js";
 import { share } from "./answer.js";
 import { AREAS } from "./books.js";
 
@@ -13,7 +13,7 @@ var currentAllowMature = false;
 var gameOver = false;
 
 function getTodayKey() {
-    return new Date().toISOString().slice(0, 10);
+    return getLocalDateKey();
 }
 
 // The Main Menu button (above the title) only shows when leaving is allowed:
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
-    // Show timer for daily mode (UTC-based)
+    // Show timer for daily mode (resets at local midnight)
     startDailyTimer();
 
     async function startGameFromUI(forceNewRandom = false) {
@@ -440,9 +440,9 @@ function startDailyTimer() {
 
     function update() {
         const now = new Date();
-        // Next challenge uses ISO date (UTC day boundary). Compute next UTC midnight.
-        const nextUtcMidnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
-        let diff = nextUtcMidnight - now;
+        // Next challenge arrives at the player's local midnight.
+        const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        let diff = nextMidnight - now;
         if (diff < 0) diff = 0;
         const hrs = Math.floor(diff / 3600000);
         const mins = Math.floor((diff % 3600000) / 60000);

@@ -1,3 +1,5 @@
+import { getLocalDateKey } from "./data.js";
+
 const EMOJI = {
     "green": "🟩",
     "yellow": "🟨",
@@ -19,7 +21,7 @@ export function buildShareText(info = {}) {
     const solved = lines[lines.length - 1] === EMOJI.green.repeat(5);
     const score = `${solved ? lines.length : "X"}/7${info.hardMode ? "*" : ""}`;
     const label = info.mode === "daily"
-        ? `Daily ${new Date().toISOString().slice(0, 10)}`
+        ? `Daily ${getLocalDateKey()}`
         : `Random (seed ${info.seed})`;
 
     return `Bibirble ${label} ${score}\n\n${lines.join("\n")}\n\nCould you beat this score?`;
