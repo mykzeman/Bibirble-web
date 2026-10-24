@@ -189,7 +189,7 @@ body {
     font-size: 16px;
     cursor: pointer;
     flex: 1;
-    border-radius: 4px;
+    border-radius: 14px; /* soft, rounded keys */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -326,8 +326,8 @@ body {
     background: #7a5830;
     color: white;
     border: none;
-    border-radius: 8px;
-    padding: 10px 14px;
+    border-radius: 999px; /* pill shape */
+    padding: 10px 16px;
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 }
@@ -361,8 +361,8 @@ body {
     background: rgb(200, 100, 50);
     color: white;
     border: none;
-    padding: 14px 20px;
-    border-radius: 12px;
+    padding: 14px 22px;
+    border-radius: 999px; /* pill shape */
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
