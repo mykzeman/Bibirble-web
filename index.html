@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bibirble</title>
     <meta name="theme-color" content="#ebe69d">
     <meta name="description" content="Guess the Bible verse, Wordle-style.">
@@ -15,6 +15,26 @@
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="preload" href="fonts/material-symbols-rounded.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="styles/styles.css">
+    <script>
+        // Size the app to the part of the screen you can actually see.
+        // Some Android browsers report a 100dvh that includes the space under
+        // the navigation buttons, which cut off the bottom of the keypad.
+        (function () {
+            function fit() {
+                var h = window.innerHeight;
+                if (window.visualViewport && window.visualViewport.height < h) {
+                    h = window.visualViewport.height;
+                }
+                var root = document.documentElement.style;
+                root.setProperty('--app-height', h + 'px');
+                root.setProperty('--vh', (h / 100) + 'px');
+            }
+            fit();
+            window.addEventListener('resize', fit);
+            window.addEventListener('orientationchange', function () { setTimeout(fit, 200); });
+            if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);
+        })();
+    </script>
 </head>
 <body>
 
