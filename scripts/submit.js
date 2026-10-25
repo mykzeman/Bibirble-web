@@ -105,6 +105,8 @@ export function setRow(currentStage, verse, options = {}) {
         if (nextRow) {
             nextRow.classList.remove("disabled");
             nextRow.querySelectorAll("input, select").forEach(el => el.disabled = false);
+            // Small screens: keep the row you're about to fill in on screen.
+            nextRow.scrollIntoView({ block: "nearest", behavior: "smooth" });
         }
 
         // --- Check Book Answer ---
