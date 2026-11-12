@@ -124,12 +124,16 @@ body {
 /*
    Row Controls Mapping:
 */
+/* Book dropdown: wide enough for tidy names like "1 Thessalonians" */
 .choice {
-    flex: 2;
-    max-width: 100px;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 160px;
     height: 40px;
     margin-right: 4px;
+    padding: 0 4px;
     font-size: 16px; /* Prevent iOS zoom */
+    text-overflow: ellipsis;
 }
 
 .text-ctrl {
@@ -599,9 +603,6 @@ h2 .icon {
         width: 34px;
         font-size: 16px;
     }
-    .choice {
-        max-width: 80px;
-    }
     .header-text {
         font-size: 1.5rem;
     }
@@ -761,5 +762,115 @@ select {
     .choice,
     .text-ctrl {
         height: 34px;
+    }
+}
+
+/* ── Christmas ──────────────────────────────────────────────────────────
+   All through December (index.html adds .christmas to <html>): snowy
+   ivory, Christmas red keys and buttons, evergreen accents, and snow
+   falling behind the menus. The clue colors on the guess boxes never
+   change. */
+.christmas body {
+    background-color: #1d5a3a; /* evergreen around the app on big screens */
+}
+.christmas .frame {
+    position: relative;
+    isolation: isolate; /* keeps the snow behind everything in the frame */
+    background-color: #f7f2e4;
+}
+.christmas .header-text {
+    color: #b3262c;
+}
+.christmas .header-text::before,
+.christmas .header-text::after {
+    content: "🎄";
+    font-size: 0.75em;
+    margin: 0 0.3em;
+    vertical-align: 0.1em;
+}
+.christmas .keyboard-panel {
+    background-color: #b3262c;
+}
+.christmas .button {
+    color: #f7f2e4;
+}
+.christmas .keypad .button {
+    background-color: rgba(0, 0, 0, 0.18);
+}
+.christmas .keypad #submit.button {
+    background-color: #f7f2e4;
+    color: #b3262c;
+}
+.christmas .mode-button {
+    background: #b3262c;
+}
+.christmas .small-button,
+.christmas .secondary-button {
+    background: #1d5a3a;
+}
+.christmas .icon-button {
+    color: #1d5a3a;
+}
+.christmas .switch input:checked + .slider {
+    background-color: #1d5a3a;
+}
+
+/* Menu banner with a candy cane stripe along the top */
+.christmas-banner {
+    width: 92%;
+    background-color: white;
+    background-image: repeating-linear-gradient(-45deg, #b3262c 0 8px, white 8px 16px);
+    background-size: 100% 6px;
+    background-repeat: no-repeat;
+    border-radius: 16px;
+    padding: 16px 14px 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+    color: #333;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* Snow: drifts down behind the menus, never over the game */
+.snow {
+    display: none;
+}
+.christmas .snow {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+.christmas .frame:has(.keyboard-panel:not(.hidden)) .snow {
+    display: none;
+}
+.snow span {
+    position: absolute;
+    top: -40px;
+    color: #9fbedb;
+    opacity: 0.8;
+    animation: snowfall linear infinite;
+}
+.snow span:nth-child(1)  { left: 4%;  font-size: 14px; animation-duration: 11s; animation-delay: -2s;  --drift: 20px; }
+.snow span:nth-child(2)  { left: 13%; font-size: 20px; animation-duration: 15s; animation-delay: -9s;  --drift: -25px; }
+.snow span:nth-child(3)  { left: 22%; font-size: 11px; animation-duration: 9s;  animation-delay: -5s;  --drift: 15px; }
+.snow span:nth-child(4)  { left: 31%; font-size: 17px; animation-duration: 13s; animation-delay: -1s;  --drift: -15px; }
+.snow span:nth-child(5)  { left: 40%; font-size: 12px; animation-duration: 10s; animation-delay: -7s;  --drift: 25px; }
+.snow span:nth-child(6)  { left: 49%; font-size: 22px; animation-duration: 16s; animation-delay: -12s; --drift: -20px; }
+.snow span:nth-child(7)  { left: 58%; font-size: 13px; animation-duration: 12s; animation-delay: -4s;  --drift: 18px; }
+.snow span:nth-child(8)  { left: 67%; font-size: 18px; animation-duration: 14s; animation-delay: -10s; --drift: -22px; }
+.snow span:nth-child(9)  { left: 76%; font-size: 10px; animation-duration: 9s;  animation-delay: -3s;  --drift: 12px; }
+.snow span:nth-child(10) { left: 84%; font-size: 16px; animation-duration: 12s; animation-delay: -8s;  --drift: -18px; }
+.snow span:nth-child(11) { left: 91%; font-size: 12px; animation-duration: 10s; animation-delay: -6s;  --drift: 22px; }
+.snow span:nth-child(12) { left: 96%; font-size: 19px; animation-duration: 15s; animation-delay: -13s; --drift: -28px; }
+@keyframes snowfall {
+    from { transform: translate3d(0, 0, 0) rotate(0deg); }
+    to { transform: translate3d(var(--drift, 20px), calc(100vh + 80px), 0) rotate(180deg); }
+}
+/* Players who turn off motion get no falling snow */
+@media (prefers-reduced-motion: reduce) {
+    .christmas .snow {
+        display: none;
     }
 }

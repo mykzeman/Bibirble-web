@@ -1,6 +1,7 @@
 import { initGame, submitFromData, getLocalDateKey } from "./data.js";
 import { share } from "./answer.js";
-import { AREAS } from "./books.js";
+import { AREAS, AREA_NAMES, bookName } from "./books.js";
+import { isChristmasSeason } from "./christmas.js";
 
 var stage = 0;
 var targetIndex = 0;
@@ -10,6 +11,7 @@ var currentHardMode = false;
 var currentUsefulOnly = false;
 var currentBookHints = false;
 var currentAllowMature = false;
+var currentChristmas = false;
 var gameOver = false;
 
 function getTodayKey() {
@@ -74,7 +76,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const hardSwitch = document.getElementById('hard-mode');
     const usefulSwitch = document.getElementById('useful-only');
     const hintsSwitch = document.getElementById('book-hints');
+    const christmasSwitch = document.getElementById('christmas-verses');
 
+    // December: festive banner on the menu and the Christmas verses switch.
+    // (The festive look itself is switched on in index.html.)
+    if (isChristmasSeason()) {
+        const banner = document.getElementById('christmas-banner');
+        if (banner) {
+            banner.innerHTML = new Date().getDate() === 25
+                ? '🎁 <strong>Merry Christmas!</strong> Jesus is born! Today\'s Daily is extra special.'
+                : '🎄 <strong>Merry Christmas!</strong> Every Daily this month is a Christmas verse.';
+            banner.classList.remove('hidden');
+        }
+        const christmasRow = document.getElementById('christmas-row');
+        if (christmasRow) christmasRow.classList.remove('hidden');
+    }
 
     // R18 mode: only switches on after a date-of-birth check (18 or older).
     const r18Switch = document.getElementById('r18-mode');
@@ -133,8 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (areasList) {
         Object.entries(AREAS).forEach(([area, books]) => {
             const item = areasList.appendChild(document.createElement('li'));
-            item.appendChild(document.createElement('strong')).textContent = area + ': ';
-            item.appendChild(document.createTextNode(books.join(', ')));
+            item.appendChild(document.createElement('strong')).textContent = (AREA_NAMES[area] || area) + ': ';
+            // No-break spaces keep names like "2 Samuel" on one line.
+            item.appendChild(document.createTextNode(
+                books.map(b => bookName(b).replace(/ /g, '\u00a0')).join(', ')));
         });
     }
 
@@ -283,7 +301,11 @@ document.addEventListener('DOMContentLoaded', () => {
             areasRef.open = false;
         }
 
-        const opts = { mode: currentMode, usefulOnly: currentUsefulOnly, allowMature: currentAllowMature };
+        // December: the Daily is always a Christmas verse; Random games are
+        // too while the Christmas verses switch is on.
+        const christmas = isChristmasSeason() &&
+            (currentMode === 'daily' || !!(christmasSwitch && christmasSwitch.checked));
+        const opts = { mode: currentMode, usefulOnly: currentUsefulOnly, allowMature: currentAllowMature, christmas };
         const seedVal = seedInput && seedInput.value ? seedInput.value.trim() : '';
         if (currentMode === 'random') {
             if (!seedVal || forceNewRandom) opts.seed = undefined;
@@ -293,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = await initGame(opts);
         targetIndex = result.idx;
         currentSeed = result.seed;
+        currentChristmas = !!result.christmas;
         if (currentSeedDisplay) {
             currentSeedDisplay.textContent = currentMode === 'random' ? String(currentSeed) : 'none';
         }
@@ -394,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Submit button: checks the guess, or shares the result once the game is over.
 export function onSubmitPressed() {
     if (gameOver) {
-        share({ mode: currentMode, seed: currentSeed, hardMode: currentHardMode });
+        share({ mode: currentMode, seed: currentSeed, hardMode: currentHardMode, christmas: currentChristmas });
     } else {
         FinalSubmit();
     }

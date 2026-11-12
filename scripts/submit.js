@@ -1,4 +1,4 @@
-import { findListKey, findAuthor, filterBooksByClues } from "./books.js";
+import { findListKey, findAuthor, filterBooksByClues, bookName, fillBookSelect } from "./books.js";
 
 function getGameRows(rowIndex) {
     const gameRow = document.querySelectorAll(".game-row")[rowIndex];
@@ -189,7 +189,7 @@ export function setRow(currentStage, verse, options = {}) {
             setTimeout(() => alert(" You got it correct!"), 10);
             return -1;
         } else if (currentStage + 1 >= 7) {
-            setTimeout(() => alert(`You ran out of guesses. The correct answer was ${verse.book} ${verse.chapter}:${verse.verse}. Maybe you should read your Bible to reflect on what you got wrong!`), 10);
+            setTimeout(() => alert(`You ran out of guesses. The correct answer was ${bookName(verse.book)} ${verse.chapter}:${verse.verse}. Maybe you should read your Bible to reflect on what you got wrong!`), 10);
             return -1;
         } else {
             return currentStage + 1;
@@ -213,13 +213,7 @@ function applyBookHints(rowElements, currentStage, groupOf) {
         const allBooks = (select.dataset.allBooks || '').split(',').filter(Boolean);
         const books = filterBooksByClues(allBooks, clues, groupOf);
         const current = select.value;
-        select.innerHTML = '<option value=""></option>';
-        books.forEach(book => {
-            const option = document.createElement('option');
-            option.value = book;
-            option.textContent = book;
-            select.appendChild(option);
-        });
+        fillBookSelect(select, books);
         // Only one book left (green clue): pick it for the player.
         if (books.length === 1) select.value = books[0];
         else if (books.includes(current)) select.value = current;

@@ -35,11 +35,14 @@ It opens full screen with its own icon and keeps working offline after the first
 - `scripts/` — JavaScript files and data
 	- `answer.js`
 	- `bible_sections.json`
+	- `books.js` — book order, tidy book names, areas and authors
+	- `christmas.js` — the Christmas verses used all December
 	- `data.js`
 	- `game.js`
 	- `keyboard.js`
 	- `parse.js`
 	- `submit.js`
+	- `useful.js` — the "Useful verses only" pool
 - `LICENSE` — project license
 - `README.md` — this file
 
@@ -50,6 +53,8 @@ Color meanings (applies to both the book and the numeric digits):
 - **Grey** — the book is NOT correct or the digit is NOT in the verse.
 - **Yellow** — the book is NOT correct but is in the same area (see areas below; in hard mode, the same author), or the digit is in the verse but NOT in the right place.
 - **Green** — the book is CORRECT or the digit is CORRECT and in the right place.
+
+**Christmas month:** all through December the app gets a festive look, every Daily is a Christmas verse (Christmas Day is always Luke 2:11), and Random games use Christmas verses too while the "Christmas verses" switch in Settings is on.
 
 Areas and books referenced by the game:
 

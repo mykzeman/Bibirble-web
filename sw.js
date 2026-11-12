@@ -1,6 +1,6 @@
 // Bibirble service worker: lets the installed app work offline.
 // Bump CACHE when shipping changes so players get the new files.
-const CACHE = 'bibirble-v16';
+const CACHE = 'bibirble-v17';
 const SHELL = [
     './',
     'index.html',
@@ -8,6 +8,7 @@ const SHELL = [
     'styles/styles.css',
     'scripts/answer.js',
     'scripts/books.js',
+    'scripts/christmas.js',
     'scripts/data.js',
     'scripts/game.js',
     'scripts/keyboard.js',
