@@ -1,7 +1,8 @@
 import { setRow } from './submit.js';
 import { sliceList } from "./parse.js";
 import { USEFUL_VERSES } from "./useful.js";
-import { sortBooks } from "./books.js";
+import { sortBooks, bookName, fillBookSelect } from "./books.js";
+import { CHRISTMAS_VERSES, CHRISTMAS_DAY_VERSE } from "./christmas.js";
 
 let bibleData = [];
 
@@ -54,8 +55,8 @@ export function getLocalDateKey(date = new Date()) {
     return `${y}-${m}-${d}`;
 }
 
-function getDailySeed() {
-    return hashStringToInt(getLocalDateKey());
+function getDailySeed(date = new Date()) {
+    return hashStringToInt(getLocalDateKey(date));
 }
 
 // Indices into bibleData that make up the "Useful verses only" pool, in
@@ -69,16 +70,45 @@ function getUsefulIndices() {
     return indices;
 }
 
-// initGame now accepts options: { mode: 'daily'|'random', seed: string|number, usefulOnly: boolean, allowMature: boolean }
+// Indices into bibleData of the Christmas verses, in CHRISTMAS_VERSES order
+// (not dataset order) so the December Daily matches the C++ version.
+function getChristmasIndices() {
+    const indexOf = new Map(bibleData.map((item, i) =>
+        [`${item.book} ${Number(item.chapter)}:${Number(item.verse)}`, i]));
+    return CHRISTMAS_VERSES
+        .map(([book, chapter, verse]) => indexOf.get(`${book} ${chapter}:${verse}`))
+        .filter(i => i !== undefined);
+}
+
+// December Daily: a different Christmas verse every day (the list is
+// shuffled once per year), and Christmas Day is always Luke 2:11. Must
+// match PickChristmasDailyPosition in bibirble's SeededRandom.cpp.
+export function pickChristmasDailyPosition(poolLength, specialPosition, year, day) {
+    if (day === 25 && specialPosition !== -1) return specialPosition;
+    const positions = [];
+    for (let k = 0; k < poolLength; k++) {
+        if (k !== specialPosition) positions.push(k);
+    }
+    const random = createSeededRandom(mixSeed(hashStringToInt(`christmas ${year}`)));
+    for (let k = positions.length - 1; k > 0; k--) {
+        const j = Math.floor(random() * (k + 1));
+        [positions[k], positions[j]] = [positions[j], positions[k]];
+    }
+    return positions[(day - 1) % positions.length];
+}
+
+// initGame now accepts options: { mode: 'daily'|'random', seed: string|number, usefulOnly: boolean, allowMature: boolean, christmas: boolean }
+// christmas: pick from the Christmas verses (December).
 export async function initGame(options = { mode: 'daily' }) {
     try {
         const res = await fetch("scripts/bible_sections.json");
         bibleData = await res.json();
         // Determine seed based on mode
         const mode = options.mode || 'daily';
+        const today = new Date();
         let seedVal;
         if (mode === 'daily') {
-            seedVal = getDailySeed();
+            seedVal = getDailySeed(today);
         } else {
             if (options.seed !== undefined && options.seed !== null && options.seed !== '') {
                 // Number seeds (like the one shown after a game) are used as-is so
@@ -92,12 +122,24 @@ export async function initGame(options = { mode: 'daily' }) {
         }
 
         // Pick verse index from seed
-        // Candidate verses: the Useful pool or the whole dataset, minus
-        // mature (R18) verses unless R18 mode is on.
-        let candidates = options.usefulOnly ? getUsefulIndices() : [];
+        // Candidate verses: the Christmas verses, the Useful pool or the
+        // whole dataset, minus mature (R18) verses unless R18 mode is on.
+        const christmasPool = options.christmas ? getChristmasIndices() : [];
+        const christmas = christmasPool.length > 0;
+        let candidates = christmas ? christmasPool
+            : options.usefulOnly ? getUsefulIndices() : [];
         if (candidates.length === 0) candidates = bibleData.map((_, i) => i);
         if (!options.allowMature) candidates = candidates.filter(i => !bibleData[i].mature);
-        const idx = candidates[pickIndexFromSeed(seedVal, candidates.length)];
+        let idx;
+        if (christmas && mode === 'daily') {
+            const [book, chapter, verseNum] = CHRISTMAS_DAY_VERSE;
+            const special = candidates.findIndex(i => bibleData[i].book === book &&
+                Number(bibleData[i].chapter) === chapter && Number(bibleData[i].verse) === verseNum);
+            idx = candidates[pickChristmasDailyPosition(candidates.length, special,
+                today.getFullYear(), today.getDate())];
+        } else {
+            idx = candidates[pickIndexFromSeed(seedVal, candidates.length)];
+        }
         const verse = bibleData[idx];
         
         // Populate the dropdowns with only the books that have a verse in
@@ -106,22 +148,16 @@ export async function initGame(options = { mode: 'daily' }) {
         document.querySelectorAll(".choice").forEach(el => {
             // Full list, kept so book hints can rebuild the dropdown later.
             el.dataset.allBooks = uniqueValues.join(',');
-            el.innerHTML = '<option value=""></option>'; // Clear existing
-            uniqueValues.forEach(value => {
-                const option = document.createElement("option");
-                option.value = value;
-                option.textContent = value;
-                el.appendChild(option);
-            });
+            fillBookSelect(el, uniqueValues);
         });
 
         // Set initial reveal
         updateReveal(verse, 0);
 
-        return { idx, seed: seedVal };
+        return { idx, seed: seedVal, christmas };
     } catch (e) {
         console.error("Failed to load game data", e);
-        return { idx: 0, seed: 0 };
+        return { idx: 0, seed: 0, christmas: false };
     }
 }
 
@@ -171,7 +207,7 @@ function updateReveal(verse, stage) {
     if (stage==-1) {
        const answer= reveal.appendChild(document.createElement("p"));
        answer.id="answer";
-       answer.innerHTML=`- ${verse.book} ${verse.chapter}:${verse.verse}`;
+       answer.textContent = `- ${bookName(verse.book)} ${verse.chapter}:${verse.verse}`;
     }
 }
 

@@ -34,12 +34,25 @@
             window.addEventListener('orientationchange', function () { setTimeout(fit, 200); });
             if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);
         })();
+
+        // Christmas month: festive look all December (the .christmas styles
+        // in styles.css). Set here so the page never flashes the usual look.
+        if (new Date().getMonth() === 11) {
+            document.documentElement.classList.add('christmas');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f2e4');
+        }
     </script>
 </head>
 <body>
 
     <!-- Main Window (Frame) -->
     <div class="frame">
+
+        <!-- Christmas snow: falls behind the menus in December (styles.css) -->
+        <div class="snow" aria-hidden="true">
+            <span>❄</span><span>❄</span><span>❄</span><span>❄</span><span>❄</span><span>❄</span>
+            <span>❄</span><span>❄</span><span>❄</span><span>❄</span><span>❄</span><span>❄</span>
+        </div>
 
         <!-- Game top bar: the way back to the menu sits above the title while playing -->
         <div id="game-top-bar" class="game-top-bar hidden">
@@ -51,6 +64,8 @@
         <p id="subtitle">World English Bible Version</p>
         <!-- Start Screen: choose mode to begin -->
         <div id="start-screen" class="start-screen">
+            <!-- December only: filled in by game.js -->
+            <div id="christmas-banner" class="christmas-banner hidden"></div>
             <div class="start-headline">Choose a mode to begin</div>
             <div class="start-actions">
                 <button id="start-daily" class="mode-button"><span class="icon" aria-hidden="true">calendar_today</span> Start Daily</button>
@@ -71,6 +86,13 @@
                 <div class="settings-title">Settings</div>
             </div>
             <div class="settings-card">
+                <div class="setting-row hidden" id="christmas-row">
+                    <span>🎄 Christmas verses<br><small class="setting-help">Random games pick Christmas verses too. December's Daily is always one.</small></span>
+                    <label class="switch">
+                        <input type="checkbox" id="christmas-verses" checked />
+                        <span class="slider"></span>
+                    </label>
+                </div>
                 <div class="setting-row">
                     <span>Hard mode</span>
                     <label class="switch">
@@ -116,7 +138,7 @@
                 <div class="setting-row settings-row-action">
                     <button id="settings-new-seed" class="mode-button secondary-button"><span class="icon" aria-hidden="true">casino</span> Randomize Seed</button>
                 </div>
-                <div class="settings-note">Seed settings, hard mode, useful verses only, book hints, and R18 mode apply to the next game you start. You can return here anytime.</div>
+                <div class="settings-note">Seed settings, Christmas verses, hard mode, useful verses only, book hints, and R18 mode apply to the next game you start. You can return here anytime.</div>
             </div>
 
             <details class="menu-info-card help-card" open>
@@ -142,6 +164,9 @@
                 <summary><span class="icon" aria-hidden="true">new_releases</span> What's New <span class="whats-new-hint">tap to show</span></summary>
                 <!-- Keep each feature to at most two lines on a phone screen. See CLAUDE.md. -->
                 <ul class="whats-new-list">
+                    <li><strong>Christmas:</strong> festive look all December.</li>
+                    <li><strong>Christmas verses:</strong> every December Daily.</li>
+                    <li><strong>Book names:</strong> tidy, like 1 John.</li>
                     <li><strong>Wide screens:</strong> keypad sits beside the game.</li>
                     <li><strong>Phone fit:</strong> all rows fit; keypad on the side.</li>
                     <li><strong>Daily reset:</strong> new verse at your midnight.</li>
