@@ -1,13 +1,14 @@
-// Traditional (Protestant canon) book order, Genesis to Revelation. Used to
-// sort the book dropdowns. Keep in sync with bibirble's BibleData.cpp.
+// Traditional book order, Genesis to Revelation. Used to sort the book
+// dropdowns. The deuterocanonical books (only in the Douay-Rheims and CPDV)
+// sit where Catholic Bibles put them. Keep in sync with bibirble's BibleData.cpp.
 export const BOOK_ORDER = [
     "genesis", "exodus", "leviticus", "numbers", "deuteronomy",
     "joshua", "judges", "ruth", "1samuel", "2samuel", "1kings", "2kings",
-    "1chronicles", "2chronicles", "ezra", "nehemiah", "esther", "job",
-    "psalms", "proverbs", "ecclesiastes", "songofsolomon", "isaiah",
-    "jeremiah", "lamentations", "ezekiel", "daniel", "hosea", "joel", "amos",
+    "1chronicles", "2chronicles", "ezra", "nehemiah", "tobit", "judith", "esther", "job",
+    "psalms", "proverbs", "ecclesiastes", "songofsolomon", "wisdom", "sirach", "isaiah",
+    "jeremiah", "lamentations", "baruch", "ezekiel", "daniel", "hosea", "joel", "amos",
     "obadiah", "jonah", "micah", "nahum", "habakkuk", "zephaniah", "haggai",
-    "zechariah", "malachi",
+    "zechariah", "malachi", "1maccabees", "2maccabees",
     "matthew", "mark", "luke", "john", "acts", "romans", "1corinthians",
     "2corinthians", "galatians", "ephesians", "philippians", "colossians",
     "1thessalonians", "2thessalonians", "1timothy", "2timothy", "titus",
@@ -40,7 +41,9 @@ export const BOOK_NAMES = {
     philemon: "Philemon", hebrews: "Hebrews", james: "James",
     "1peter": "1 Peter", "2peter": "2 Peter", "1john": "1 John",
     "2john": "2 John", "3john": "3 John", jude: "Jude",
-    revelation: "Revelation"
+    revelation: "Revelation",
+    tobit: "Tobit", judith: "Judith", wisdom: "Wisdom", sirach: "Sirach",
+    baruch: "Baruch", "1maccabees": "1 Maccabees", "2maccabees": "2 Maccabees"
 };
 
 export function bookName(book) {
@@ -51,10 +54,10 @@ export function bookName(book) {
 // bibirble's tools/sort.py, which sets each verse's "area" field.
 export const AREAS = {
     "Torah": ["genesis", "exodus", "leviticus", "numbers", "deuteronomy"],
-    "Historical": ["joshua", "judges", "1samuel", "2samuel", "1kings", "2kings", "1chronicles", "2chronicles", "nehemiah"],
-    "Poems": ["psalms", "proverbs", "ecclesiastes", "songofsolomon", "lamentations"],
-    "Small stories": ["job", "esther", "jonah", "ruth", "ezra"],
-    "Prophets Major": ["isaiah", "jeremiah", "ezekiel", "daniel"],
+    "Historical": ["joshua", "judges", "1samuel", "2samuel", "1kings", "2kings", "1chronicles", "2chronicles", "nehemiah", "1maccabees", "2maccabees"],
+    "Poems": ["psalms", "proverbs", "ecclesiastes", "songofsolomon", "lamentations", "wisdom", "sirach"],
+    "Small stories": ["job", "esther", "jonah", "ruth", "ezra", "tobit", "judith"],
+    "Prophets Major": ["isaiah", "jeremiah", "ezekiel", "daniel", "baruch"],
     "Prophets Minor": ["hosea", "joel", "amos", "obadiah", "micah", "nahum", "habakkuk", "zephaniah", "haggai", "zechariah", "malachi"],
     "Gospel": ["matthew", "mark", "luke", "john"],
     "Acts from Hebrews": ["acts", "hebrews"],
@@ -97,7 +100,9 @@ export const AUTHORS = {
     "Jeremiah": ["1kings", "2kings", "jeremiah", "lamentations"],
     "Ezra and Nehemiah": ["1chronicles", "2chronicles", "ezra", "nehemiah"],
     "David": ["psalms"],
-    "Solomon": ["proverbs", "ecclesiastes", "songofsolomon"],
+    "Solomon": ["proverbs", "ecclesiastes", "songofsolomon", "wisdom"],
+    "Ben Sira": ["sirach"],
+    "Baruch": ["baruch"],
     "Isaiah": ["isaiah"],
     "Ezekiel": ["ezekiel"],
     "Daniel": ["daniel"],
@@ -120,7 +125,7 @@ export const AUTHORS = {
     "Paul": ["romans", "1corinthians", "2corinthians", "galatians", "ephesians", "philippians", "colossians", "1thessalonians", "2thessalonians", "1timothy", "2timothy", "titus", "philemon"],
     "Peter": ["1peter", "2peter"],
     "Jesus' brothers": ["james", "jude"],
-    "Unknown": ["job", "esther", "hebrews"]
+    "Unknown": ["job", "esther", "hebrews", "tobit", "judith", "1maccabees", "2maccabees"]
 };
 
 export function findAuthor(item) {

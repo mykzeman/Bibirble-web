@@ -34,15 +34,16 @@ It opens full screen with its own icon and keeps working offline after the first
 - `styles/` — CSS (styles.css)
 - `scripts/` — JavaScript files and data
 	- `answer.js`
-	- `bible_sections.json`
+	- `bible_sections.json` — World English Bible verses; `bible_sections_kjv.json`, `bible_sections_dr.json` and `bible_sections_cpdv.json` hold the other versions (built by bibirble's `tools/sort.py`)
 	- `books.js` — book order, tidy book names, areas and authors
 	- `christmas.js` — the Christmas verses used all December
 	- `data.js`
 	- `game.js`
 	- `keyboard.js`
-	- `parse.js`
 	- `submit.js`
 	- `useful.js` — the "Useful verses only" pool
+	- `versions.js` — the Bible versions you can pick in Settings
+- `licenses/` — MIT licenses of the KJV and Douay-Rheims verse data
 - `LICENSE` — project license
 - `README.md` — this file
 
@@ -53,6 +54,8 @@ Color meanings (applies to both the book and the numeric digits):
 - **Grey** — the book is NOT correct or the digit is NOT in the verse.
 - **Yellow** — the book is NOT correct but is in the same area (see areas below; in hard mode, the same author), or the digit is in the verse but NOT in the right place.
 - **Green** — the book is CORRECT or the digit is CORRECT and in the right place.
+
+**Bible versions:** pick the World English Bible, King James Version, Douay-Rheims or Catholic Public Domain Version in Settings. Only the picked version downloads. The Douay-Rheims and CPDV also have Tobit, Judith, Wisdom, Sirach, Baruch and 1-2 Maccabees (in Small Stories, Poetry & Wisdom, Major Prophets and History), and number most Psalms one lower (Psalm 23 is their Psalm 22). The number keys light up green, yellow or gray as you find each digit.
 
 **Christmas month:** all through December the app gets a festive look, every Daily is a Christmas verse (Christmas Day is always Luke 2:11), and Random games use Christmas verses too while the "Christmas verses" switch in Settings is on.
 
@@ -154,7 +157,11 @@ Contributions are welcome. To contribute, open an issue or submit a pull request
 
 ## License & Credits
 
-This project includes or references the World English Bible dataset. See the `LICENSE` file for licensing details.
+The Bible texts (World English Bible, King James Version, Douay-Rheims 1899 American Edition and Catholic Public Domain Version) are in the public domain. See the `LICENSE` file for licensing details.
 
-Data source reference: https://github.com/TehShrike/world-english-bible
+Data sources:
+- World English Bible: https://github.com/TehShrike/world-english-bible
+- King James Version: https://github.com/aruljohn/Bible-kjv (MIT License, `licenses/bible-kjv-LICENSE.txt`)
+- Douay-Rheims: https://github.com/yoarikso/douayrheimsbible (MIT License, `licenses/douayrheimsbible-LICENSE.txt`)
+- Catholic Public Domain Version: by Ronald L. Conte Jr., public domain
 
