@@ -2,6 +2,7 @@ import { initGame, submitFromData, getLocalDateKey } from "./data.js";
 import { share } from "./answer.js";
 import { AREAS, AREA_NAMES, bookName } from "./books.js";
 import { isChristmasSeason } from "./christmas.js";
+import { VERSIONS, findVersion, getSavedVersion, saveVersion } from "./versions.js";
 
 var stage = 0;
 var targetIndex = 0;
@@ -12,6 +13,7 @@ var currentUsefulOnly = false;
 var currentBookHints = false;
 var currentAllowMature = false;
 var currentChristmas = false;
+var currentVersion = getSavedVersion();
 var gameOver = false;
 
 function getTodayKey() {
@@ -144,15 +146,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const areasRef = document.getElementById('areas-ref');
     let settingsReturnTo = 'menu';
 
-    // Book areas reference (what a yellow book clue means outside hard mode)
+    // Bible version: remembered on this device, used from the next game on.
+    const versionSelect = document.getElementById('bible-version');
+    const subtitle = document.getElementById('subtitle');
+    function showVersion(version) {
+        if (subtitle) subtitle.textContent = version.name;
+    }
+    if (versionSelect) {
+        VERSIONS.forEach(v => {
+            const option = versionSelect.appendChild(document.createElement('option'));
+            option.value = v.id;
+            option.textContent = `${v.name} (${v.short})`;
+        });
+        versionSelect.value = getSavedVersion().id;
+        versionSelect.addEventListener('change', () => {
+            saveVersion(versionSelect.value);
+            showVersion(findVersion(versionSelect.value));
+        });
+    }
+    showVersion(getSavedVersion());
+
+    // Book areas reference (what a yellow book clue means outside hard mode),
+    // listing only the books this game's Bible version has.
     const areasList = document.getElementById('areas-list');
-    if (areasList) {
+    function fillAreasList(gameBooks) {
+        if (!areasList) return;
+        areasList.innerHTML = '';
+        const have = new Set(gameBooks);
         Object.entries(AREAS).forEach(([area, books]) => {
+            const shown = books.filter(b => have.has(b));
+            if (shown.length === 0) return;
             const item = areasList.appendChild(document.createElement('li'));
             item.appendChild(document.createElement('strong')).textContent = (AREA_NAMES[area] || area) + ': ';
             // No-break spaces keep names like "2 Samuel" on one line.
             item.appendChild(document.createTextNode(
-                books.map(b => bookName(b).replace(/ /g, '\u00a0')).join(', ')));
+                shown.map(b => bookName(b).replace(/ /g, '\u00a0')).join(', ')));
         });
     }
 
@@ -305,7 +333,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // too while the Christmas verses switch is on.
         const christmas = isChristmasSeason() &&
             (currentMode === 'daily' || !!(christmasSwitch && christmasSwitch.checked));
-        const opts = { mode: currentMode, usefulOnly: currentUsefulOnly, allowMature: currentAllowMature, christmas };
+        currentVersion = findVersion(versionSelect ? versionSelect.value : getSavedVersion().id);
+        showVersion(currentVersion);
+        const opts = { mode: currentMode, usefulOnly: currentUsefulOnly, allowMature: currentAllowMature, christmas,
+            version: currentVersion.id };
         const seedVal = seedInput && seedInput.value ? seedInput.value.trim() : '';
         if (currentMode === 'random') {
             if (!seedVal || forceNewRandom) opts.seed = undefined;
@@ -316,6 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
         targetIndex = result.idx;
         currentSeed = result.seed;
         currentChristmas = !!result.christmas;
+        const firstSelect = document.querySelector('.choice');
+        fillAreasList(firstSelect ? (firstSelect.dataset.allBooks || '').split(',') : []);
         if (currentSeedDisplay) {
             currentSeedDisplay.textContent = currentMode === 'random' ? String(currentSeed) : 'none';
         }
@@ -370,6 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         setKeypadGameOver(false);
+        updateKeypadColours();
         if (postGame) postGame.classList.add('hidden');
     }
 
@@ -417,7 +451,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Submit button: checks the guess, or shares the result once the game is over.
 export function onSubmitPressed() {
     if (gameOver) {
-        share({ mode: currentMode, seed: currentSeed, hardMode: currentHardMode, christmas: currentChristmas });
+        share({ mode: currentMode, seed: currentSeed, hardMode: currentHardMode, christmas: currentChristmas,
+            version: currentVersion.short });
     } else {
         FinalSubmit();
     }
@@ -427,6 +462,7 @@ export function FinalSubmit() {
     const today = getTodayKey();
     const result = submitFromData(stage, targetIndex, { hardMode: currentHardMode, bookHints: currentBookHints });
     stage = result[0];
+    updateKeypadColours();
 
     if (stage === -1) {
         if (currentMode === 'daily') {
@@ -439,6 +475,24 @@ export function FinalSubmit() {
         const postGame = document.getElementById('post-game-controls');
         if (postGame) postGame.classList.remove('hidden');
     }
+}
+
+// Number keys show the best clue each digit has had this game, like a
+// Wordle keyboard: green beats yellow beats gray. Matches
+// UpdateDigitKeyColours in bibirble's BibirbleWindow.cpp.
+function updateKeypadColours() {
+    const rank = { gray: 1, yellow: 2, green: 3 };
+    const best = {};
+    document.querySelectorAll('.game-row .text-ctrl').forEach(ctrl => {
+        const colour = ctrl.style.backgroundColor;
+        if (!rank[colour] || ctrl.value === '') return;
+        if (!best[ctrl.value] || rank[colour] > rank[best[ctrl.value]]) best[ctrl.value] = colour;
+    });
+    document.querySelectorAll('.keypad .button').forEach(key => {
+        const digit = key.textContent.trim();
+        key.classList.remove('key-green', 'key-yellow', 'key-gray');
+        if (/^\d$/.test(digit) && best[digit]) key.classList.add(`key-${best[digit]}`);
+    });
 }
 
 // Whole years between a YYYY-MM-DD birth date and today, or null if the

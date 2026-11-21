@@ -1,13 +1,16 @@
-// Traditional (Protestant canon) book order, Genesis to Revelation. Used to
-// sort the book dropdowns. Keep in sync with bibirble's BibleData.cpp.
+// Traditional book order, Genesis to Revelation. Used to sort the book
+// dropdowns. The deuterocanonical and apocryphal books (only some versions
+// have them) sit near the books they belong with. Keep in sync with bibirble's BibleData.cpp.
 export const BOOK_ORDER = [
     "genesis", "exodus", "leviticus", "numbers", "deuteronomy",
     "joshua", "judges", "ruth", "1samuel", "2samuel", "1kings", "2kings",
-    "1chronicles", "2chronicles", "ezra", "nehemiah", "esther", "job",
-    "psalms", "proverbs", "ecclesiastes", "songofsolomon", "isaiah",
-    "jeremiah", "lamentations", "ezekiel", "daniel", "hosea", "joel", "amos",
+    "1chronicles", "2chronicles", "ezra", "nehemiah", "1esdras", "2esdras", "tobit", "judith",
+    "esther", "esthergreek", "job", "psalms", "prayerofmanasseh", "proverbs",
+    "ecclesiastes", "songofsolomon", "wisdom", "sirach", "psalmsofsolomon", "isaiah",
+    "jeremiah", "lamentations", "baruch", "letterofjeremiah", "ezekiel", "daniel", "danielgreek",
+    "songofthethree", "susanna", "bel", "hosea", "joel", "amos",
     "obadiah", "jonah", "micah", "nahum", "habakkuk", "zephaniah", "haggai",
-    "zechariah", "malachi",
+    "zechariah", "malachi", "1maccabees", "2maccabees", "3maccabees", "4maccabees",
     "matthew", "mark", "luke", "john", "acts", "romans", "1corinthians",
     "2corinthians", "galatians", "ephesians", "philippians", "colossians",
     "1thessalonians", "2thessalonians", "1timothy", "2timothy", "titus",
@@ -40,7 +43,14 @@ export const BOOK_NAMES = {
     philemon: "Philemon", hebrews: "Hebrews", james: "James",
     "1peter": "1 Peter", "2peter": "2 Peter", "1john": "1 John",
     "2john": "2 John", "3john": "3 John", jude: "Jude",
-    revelation: "Revelation"
+    revelation: "Revelation",
+    tobit: "Tobit", judith: "Judith", wisdom: "Wisdom", sirach: "Sirach",
+    baruch: "Baruch", "1maccabees": "1 Maccabees", "2maccabees": "2 Maccabees",
+    "3maccabees": "3 Maccabees", "4maccabees": "4 Maccabees", "1esdras": "1 Esdras",
+    "2esdras": "2 Esdras", esthergreek: "Esther (Greek)",
+    prayerofmanasseh: "Prayer of Manasseh", psalmsofsolomon: "Psalms of Solomon",
+    letterofjeremiah: "Letter of Jeremiah", danielgreek: "Daniel (Greek)",
+    songofthethree: "Song of the Three", susanna: "Susanna", bel: "Bel and the Dragon"
 };
 
 export function bookName(book) {
@@ -51,11 +61,14 @@ export function bookName(book) {
 // bibirble's tools/sort.py, which sets each verse's "area" field.
 export const AREAS = {
     "Torah": ["genesis", "exodus", "leviticus", "numbers", "deuteronomy"],
-    "Historical": ["joshua", "judges", "1samuel", "2samuel", "1kings", "2kings", "1chronicles", "2chronicles", "nehemiah"],
-    "Poems": ["psalms", "proverbs", "ecclesiastes", "songofsolomon", "lamentations"],
-    "Small stories": ["job", "esther", "jonah", "ruth", "ezra"],
+    "Historical": ["joshua", "judges", "1samuel", "2samuel", "1kings", "2kings", "1chronicles", "2chronicles", "nehemiah", "1esdras"],
+    "Poems": ["psalms", "proverbs", "ecclesiastes", "songofsolomon", "lamentations", "wisdom", "sirach", "prayerofmanasseh", "psalmsofsolomon"],
+    "Small stories": ["job", "esther", "jonah", "ruth", "ezra", "tobit", "judith", "esthergreek"],
     "Prophets Major": ["isaiah", "jeremiah", "ezekiel", "daniel"],
     "Prophets Minor": ["hosea", "joel", "amos", "obadiah", "micah", "nahum", "habakkuk", "zephaniah", "haggai", "zechariah", "malachi"],
+    // New areas hold at most 8 books (only the original areas and Paul's letters are bigger).
+    "Prophet alternatives": ["baruch", "letterofjeremiah", "danielgreek", "songofthethree", "susanna", "bel", "2esdras"],
+    "Maccabees": ["1maccabees", "2maccabees", "3maccabees", "4maccabees"],
     "Gospel": ["matthew", "mark", "luke", "john"],
     "Acts from Hebrews": ["acts", "hebrews"],
     "Pauls letters": ["romans", "1corinthians", "2corinthians", "galatians", "ephesians", "philippians", "colossians", "1thessalonians", "2thessalonians", "1timothy", "2timothy", "titus", "philemon"],
@@ -73,6 +86,8 @@ export const AREA_NAMES = {
     "Small stories": "Small Stories",
     "Prophets Major": "Major Prophets",
     "Prophets Minor": "Minor Prophets",
+    "Prophet alternatives": "Prophet Alternatives",
+    "Maccabees": "Maccabees",
     "Gospel": "Gospels",
     "Acts from Hebrews": "Acts & Hebrews",
     "Pauls letters": "Paul’s Letters",
@@ -94,13 +109,15 @@ export const AUTHORS = {
     "Moses": ["genesis", "exodus", "leviticus", "numbers", "deuteronomy"],
     "Joshua": ["joshua"],
     "Samuel": ["judges", "ruth", "1samuel", "2samuel"],
-    "Jeremiah": ["1kings", "2kings", "jeremiah", "lamentations"],
-    "Ezra and Nehemiah": ["1chronicles", "2chronicles", "ezra", "nehemiah"],
+    "Jeremiah": ["1kings", "2kings", "jeremiah", "lamentations", "letterofjeremiah"],
+    "Ezra and Nehemiah": ["1chronicles", "2chronicles", "ezra", "nehemiah", "1esdras", "2esdras"],
     "David": ["psalms"],
-    "Solomon": ["proverbs", "ecclesiastes", "songofsolomon"],
+    "Solomon": ["proverbs", "ecclesiastes", "songofsolomon", "wisdom"],
+    "Ben Sira": ["sirach"],
+    "Baruch": ["baruch"],
     "Isaiah": ["isaiah"],
     "Ezekiel": ["ezekiel"],
-    "Daniel": ["daniel"],
+    "Daniel": ["daniel", "danielgreek"],
     "Hosea": ["hosea"],
     "Joel": ["joel"],
     "Amos": ["amos"],
@@ -120,7 +137,8 @@ export const AUTHORS = {
     "Paul": ["romans", "1corinthians", "2corinthians", "galatians", "ephesians", "philippians", "colossians", "1thessalonians", "2thessalonians", "1timothy", "2timothy", "titus", "philemon"],
     "Peter": ["1peter", "2peter"],
     "Jesus' brothers": ["james", "jude"],
-    "Unknown": ["job", "esther", "hebrews"]
+    "Unknown": ["job", "esther", "hebrews", "tobit", "judith", "esthergreek", "songofthethree", "susanna", "bel",
+        "1maccabees", "2maccabees", "3maccabees", "4maccabees", "prayerofmanasseh", "psalmsofsolomon"]
 };
 
 export function findAuthor(item) {
