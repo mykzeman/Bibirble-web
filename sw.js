@@ -1,6 +1,6 @@
 // Bibirble service worker: lets the installed app work offline.
 // Bump CACHE when shipping changes so players get the new files.
-const CACHE = 'bibirble-v18';
+const CACHE = 'bibirble-v19';
 const SHELL = [
     './',
     'index.html',
@@ -14,6 +14,7 @@ const SHELL = [
     'scripts/keyboard.js',
     'scripts/submit.js',
     'scripts/useful.js',
+    'scripts/version_list.js',
     'scripts/versions.js',
     'fonts/material-symbols-rounded.woff2',
     'icons/icon.svg',
@@ -40,8 +41,8 @@ self.addEventListener('activate', (event) => {
 // Network first so updates show up right away; fall back to cache offline.
 // 'no-cache' checks with the server every time (cheap when nothing changed)
 // instead of trusting the browser's HTTP cache, which could hand back old
-// scripts. Each Bible version's big verse file (bible_sections*.json) gets
-// cached the first time it loads.
+// scripts. Each Bible version's verse file (bible_sections.json, or
+// bibles/<id>.json.gz) gets cached the first time it loads.
 self.addEventListener('fetch', (event) => {
     const req = event.request;
     if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;

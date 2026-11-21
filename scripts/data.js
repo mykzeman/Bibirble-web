@@ -8,10 +8,22 @@ let bibleData = [];
 let loadedFile = null;
 
 // Loads a Bible version's verses (once; switching versions loads the new one).
+// Most versions are gzipped (scripts/bibles/<id>.json.gz) and unpacked here;
+// a server that already unpacked them (Content-Encoding: gzip) is fine too.
 async function loadVersion(version) {
     if (loadedFile === version.file && bibleData.length) return;
     const res = await fetch(`scripts/${version.file}`);
-    bibleData = await res.json();
+    if (!res.ok) throw new Error(`couldn't load ${version.file} (${res.status})`);
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    let text;
+    if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
+        if (typeof DecompressionStream === 'undefined') throw new Error('this browser can\'t unpack gzip');
+        const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+        text = await new Response(stream).text();
+    } else {
+        text = new TextDecoder().decode(bytes);
+    }
+    bibleData = JSON.parse(text);
     loadedFile = version.file;
 }
 
@@ -178,6 +190,8 @@ export async function initGame(options = { mode: 'daily' }) {
         return { idx, seed: seedVal, christmas };
     } catch (e) {
         console.error("Failed to load game data", e);
+        const reveal = document.getElementById('reveal-panel');
+        if (reveal) reveal.innerText = "Couldn't load this Bible version. Check your connection, or pick another version in Settings.";
         return { idx: 0, seed: 0, christmas: false };
     }
 }
