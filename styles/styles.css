@@ -209,6 +209,23 @@ body {
     box-shadow: 0 2px 0 rgba(0,0,0,0.1);
 }
 
+/* Number keys show each digit's best clue so far (game.js updateKeypadColours) */
+.keypad .button.key-green,
+.christmas .keypad .button.key-green {
+    background-color: green;
+    color: white;
+}
+.keypad .button.key-yellow,
+.christmas .keypad .button.key-yellow {
+    background-color: yellow;
+    color: black;
+}
+.keypad .button.key-gray,
+.christmas .keypad .button.key-gray {
+    background-color: gray;
+    color: black;
+}
+
 /* Enter (submit) key: lighter so it stands out from the digit keys */
 .keypad #submit.button {
     background-color: rgb(235, 230, 157);

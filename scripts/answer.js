@@ -8,7 +8,7 @@ const EMOJI = {
 };
 
 // Builds the spoiler-free share text from the colored rows.
-// info: { mode: 'daily'|'random', seed, hardMode, christmas }
+// info: { mode: 'daily'|'random', seed, hardMode, christmas, version: 'WEB'|'KJV'|... }
 export function buildShareText(info = {}) {
     const lines = [];
     document.querySelectorAll(".game-row").forEach(row => {
@@ -22,7 +22,7 @@ export function buildShareText(info = {}) {
     const score = `${solved ? lines.length : "X"}/7${info.hardMode ? "*" : ""}`;
     const label = (info.mode === "daily"
         ? `Daily ${getLocalDateKey()}`
-        : `Random (seed ${info.seed})`) + (info.christmas ? " 🎄" : "");
+        : `Random (seed ${info.seed})`) + (info.version ? ` ${info.version}` : "") + (info.christmas ? " 🎄" : "");
 
     return `Bibirble ${label} ${score}\n\n${lines.join("\n")}\n\nCould you beat this score?`;
 }

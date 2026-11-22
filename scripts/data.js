@@ -1,10 +1,42 @@
 import { setRow } from './submit.js';
-import { sliceList } from "./parse.js";
 import { USEFUL_VERSES } from "./useful.js";
 import { sortBooks, bookName, fillBookSelect } from "./books.js";
 import { CHRISTMAS_VERSES, CHRISTMAS_DAY_VERSE } from "./christmas.js";
+import { findVersion } from "./versions.js";
 
 let bibleData = [];
+let loadedFile = null;
+
+// Loads a Bible version's verses (once; switching versions loads the new one).
+// Most versions are gzipped (scripts/bibles/<id>.json.gz) and unpacked here;
+// a server that already unpacked them (Content-Encoding: gzip) is fine too.
+async function loadVersion(version) {
+    if (loadedFile === version.file && bibleData.length) return;
+    const res = await fetch(`scripts/${version.file}`);
+    if (!res.ok) throw new Error(`couldn't load ${version.file} (${res.status})`);
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    let text;
+    if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
+        if (typeof DecompressionStream === 'undefined') throw new Error('this browser can\'t unpack gzip');
+        const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+        text = await new Response(stream).text();
+    } else {
+        text = new TextDecoder().decode(bytes);
+    }
+    bibleData = JSON.parse(text);
+    loadedFile = version.file;
+}
+
+// A verse's place in the World English Bible's numbering: "psalms 23:1". The
+// Douay-Rheims and CPDV number most Psalms one lower, so their verses carry a
+// "ref" (see bibirble's tools/sort.py); null means no World English Bible
+// match. Useful and Christmas verses are listed in World English Bible
+// numbers, so this finds the same passage in every version.
+function stdKey(item) {
+    if (item.ref === null) return null;
+    const [chapter, verse] = item.ref || [item.chapter, item.verse];
+    return `${item.book} ${Number(chapter)}:${Number(verse)}`;
+}
 
 function hashStringToInt(str) {
     let hash = 0;
@@ -65,7 +97,7 @@ function getUsefulIndices() {
     const wanted = new Set(USEFUL_VERSES.map(([book, chapter, verse]) => `${book} ${chapter}:${verse}`));
     const indices = [];
     bibleData.forEach((item, i) => {
-        if (wanted.has(`${item.book} ${Number(item.chapter)}:${Number(item.verse)}`)) indices.push(i);
+        if (wanted.has(stdKey(item))) indices.push(i);
     });
     return indices;
 }
@@ -73,8 +105,7 @@ function getUsefulIndices() {
 // Indices into bibleData of the Christmas verses, in CHRISTMAS_VERSES order
 // (not dataset order) so the December Daily matches the C++ version.
 function getChristmasIndices() {
-    const indexOf = new Map(bibleData.map((item, i) =>
-        [`${item.book} ${Number(item.chapter)}:${Number(item.verse)}`, i]));
+    const indexOf = new Map(bibleData.map((item, i) => [stdKey(item), i]));
     return CHRISTMAS_VERSES
         .map(([book, chapter, verse]) => indexOf.get(`${book} ${chapter}:${verse}`))
         .filter(i => i !== undefined);
@@ -97,12 +128,11 @@ export function pickChristmasDailyPosition(poolLength, specialPosition, year, da
     return positions[(day - 1) % positions.length];
 }
 
-// initGame now accepts options: { mode: 'daily'|'random', seed: string|number, usefulOnly: boolean, allowMature: boolean, christmas: boolean }
-// christmas: pick from the Christmas verses (December).
+// initGame accepts options: { mode: 'daily'|'random', seed: string|number, usefulOnly: boolean, allowMature: boolean, christmas: boolean, version: string }
+// christmas: pick from the Christmas verses (December). version: a Bible version id (versions.js).
 export async function initGame(options = { mode: 'daily' }) {
     try {
-        const res = await fetch("scripts/bible_sections.json");
-        bibleData = await res.json();
+        await loadVersion(findVersion(options.version));
         // Determine seed based on mode
         const mode = options.mode || 'daily';
         const today = new Date();
@@ -129,12 +159,15 @@ export async function initGame(options = { mode: 'daily' }) {
         let candidates = christmas ? christmasPool
             : options.usefulOnly ? getUsefulIndices() : [];
         if (candidates.length === 0) candidates = bibleData.map((_, i) => i);
-        if (!options.allowMature) candidates = candidates.filter(i => !bibleData[i].mature);
+        // Useful verses only always stays family friendly: a verse picked
+        // from the World English Bible can read as mature in another version.
+        if (!options.allowMature || (options.usefulOnly && !christmas)) {
+            candidates = candidates.filter(i => !bibleData[i].mature);
+        }
         let idx;
         if (christmas && mode === 'daily') {
             const [book, chapter, verseNum] = CHRISTMAS_DAY_VERSE;
-            const special = candidates.findIndex(i => bibleData[i].book === book &&
-                Number(bibleData[i].chapter) === chapter && Number(bibleData[i].verse) === verseNum);
+            const special = candidates.findIndex(i => stdKey(bibleData[i]) === `${book} ${chapter}:${verseNum}`);
             idx = candidates[pickChristmasDailyPosition(candidates.length, special,
                 today.getFullYear(), today.getDate())];
         } else {
@@ -157,6 +190,8 @@ export async function initGame(options = { mode: 'daily' }) {
         return { idx, seed: seedVal, christmas };
     } catch (e) {
         console.error("Failed to load game data", e);
+        const reveal = document.getElementById('reveal-panel');
+        if (reveal) reveal.innerText = "Couldn't load this Bible version. Check your connection, or pick another version in Settings.";
         return { idx: 0, seed: 0, christmas: false };
     }
 }
@@ -165,38 +200,17 @@ export async function initGame(options = { mode: 'daily' }) {
 
 
 
+// Shows the verse's first chunk of words, then one more chunk per stage.
+// Chunks are index ranges, so a word that appears more than once in a verse
+// is revealed at the right place (like getRevealedText in bibirble).
 function revealVerse(verse, stage) {
-    const words = verse.text.split(" ");
-    const visibleIndices = new Set();
-    const slices=Math.floor(words.length/7)
-    const chunks = sliceList(words, slices);
-    const startWords = chunks[0];
     if (stage === -1) {
         return verse.text;
     }
-    
-    // Always show the start word
-    
-        for (let i = 0; i < startWords.length; i++) {
-            visibleIndices.add(words.indexOf(startWords[i]));
-        }
-
-    // Stage logic: Expand outward based on stage number
-    // Stage 0: 1 word. Stage 1: 3 words. Stage 2: 5 words, etc.
-    for (let i = 1; i <= stage; i++) {
-        const chunk = chunks[i];
-        if (!chunk) break;
-        chunk.forEach(word => {
-            visibleIndices.add(words.indexOf(word));
-        });
-    }
-
-    // Reconstruct string
-    const maskedVerse = words.map((word, index) => {
-        return visibleIndices.has(index) ? word : "...";
-    });
-
-    return maskedVerse.join(" ");
+    const words = verse.text.split(" ");
+    const size = Math.max(1, Math.floor(words.length / 7));
+    const visibleCount = Math.min(words.length, size * (stage + 1));
+    return words.map((word, index) => index < visibleCount ? word : "...").join(" ");
 }
 
 function updateReveal(verse, stage) {
